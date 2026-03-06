@@ -42,14 +42,14 @@ class TestPriceCache:
 
 class TestFetchPrice:
     def test_returns_none_on_exception(self):
-        with patch("lib.pricing.yf.Ticker") as mock_ticker:
-            mock_ticker.side_effect = Exception("API Error")
+        with patch("lib.pricing.httpx.get", side_effect=Exception("API Error")):
             assert _fetch_price("BAD") is None
 
     def test_returns_rounded_price(self):
-        mock_info = MagicMock()
-        mock_info.last_price = 185.26789
-        with patch("lib.pricing.yf.Ticker") as mock_ticker:
-            mock_ticker.return_value.fast_info = mock_info
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = {
+            "chart": {"result": [{"meta": {"regularMarketPrice": 185.26789}}]}
+        }
+        with patch("lib.pricing.httpx.get", return_value=mock_resp):
             result = _fetch_price("NVDA")
             assert result == 185.2679
