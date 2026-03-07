@@ -1,7 +1,7 @@
 """Single FastAPI app for all Vercel serverless endpoints."""
 
 from pathlib import Path
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, field_validator
@@ -11,7 +11,7 @@ app = FastAPI(title="Portfolio Quotes API", version="2.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -343,3 +343,201 @@ async def add_trade(trade: TradeCreate):
     except NotionAPIError:
         raise HTTPException(status_code=502, detail="Notion API unavailable")
     return {"id": page_id, "status": "created", "timestamp": datetime.now().isoformat()}
+
+
+# --- Remote MCP Endpoint (Streamable HTTP, spec 2025-03-26) ---
+
+import json
+import uuid
+import secrets
+import hashlib
+import base64
+import httpx as _httpx
+from urllib.parse import urlencode, parse_qs, urlparse
+from fastapi.responses import JSONResponse, Response, RedirectResponse
+
+_MCP_API = "https://stock.cwithb.com"
+
+# --- OAuth 2.1 for MCP (minimal implementation for personal use) ---
+_OAUTH_CLIENT_ID = "portfolio-mcp-client"
+_OAUTH_CLIENT_SECRET = "pf-mcp-2026-s3cret-key"
+_OAUTH_ISSUER = "https://stock.cwithb.com"
+
+# In-memory stores (reset on cold start, fine for serverless personal use)
+_auth_codes: dict[str, dict] = {}  # code -> {redirect_uri, code_challenge, client_id}
+_access_tokens: set[str] = set()
+
+
+@app.get("/.well-known/oauth-authorization-server")
+async def oauth_metadata():
+    return JSONResponse({
+        "issuer": _OAUTH_ISSUER,
+        "authorization_endpoint": f"{_OAUTH_ISSUER}/authorize",
+        "token_endpoint": f"{_OAUTH_ISSUER}/token",
+        "response_types_supported": ["code"],
+        "grant_types_supported": ["authorization_code"],
+        "token_endpoint_auth_methods_supported": ["client_secret_post", "none"],
+        "code_challenge_methods_supported": ["S256"],
+    })
+
+
+@app.get("/authorize")
+async def oauth_authorize(
+    response_type: str = "code",
+    client_id: str = "",
+    redirect_uri: str = "",
+    state: str = "",
+    code_challenge: str = "",
+    code_challenge_method: str = "S256",
+    scope: str = "",
+):
+    """OAuth authorize endpoint — auto-approves for the known client."""
+    if client_id != _OAUTH_CLIENT_ID:
+        return JSONResponse({"error": "invalid_client"}, status_code=400)
+
+    code = secrets.token_urlsafe(32)
+    _auth_codes[code] = {
+        "redirect_uri": redirect_uri,
+        "code_challenge": code_challenge,
+        "client_id": client_id,
+    }
+
+    params = {"code": code}
+    if state:
+        params["state"] = state
+    separator = "&" if "?" in redirect_uri else "?"
+    return RedirectResponse(f"{redirect_uri}{separator}{urlencode(params)}")
+
+
+@app.post("/token")
+async def oauth_token(request: Request):
+    """OAuth token endpoint — exchanges auth code for access token."""
+    content_type = request.headers.get("content-type", "")
+    if "json" in content_type:
+        body = await request.json()
+    else:
+        # Parse form-urlencoded body manually (no python-multipart needed)
+        raw = (await request.body()).decode()
+        body = dict(pair.split("=", 1) for pair in raw.split("&") if "=" in pair)
+    grant_type = body.get("grant_type")
+    code = body.get("code", "")
+    code_verifier = body.get("code_verifier", "")
+    client_id = body.get("client_id", "")
+    client_secret = body.get("client_secret", "")
+
+    if grant_type == "authorization_code":
+        if code not in _auth_codes:
+            return JSONResponse({"error": "invalid_grant"}, status_code=400)
+
+        auth_data = _auth_codes.pop(code)
+
+        # Verify PKCE if code_challenge was provided
+        if auth_data["code_challenge"] and code_verifier:
+            expected = base64.urlsafe_b64encode(
+                hashlib.sha256(code_verifier.encode()).digest()
+            ).rstrip(b"=").decode()
+            if expected != auth_data["code_challenge"]:
+                return JSONResponse({"error": "invalid_grant", "error_description": "PKCE verification failed"}, status_code=400)
+
+        token = secrets.token_urlsafe(48)
+        _access_tokens.add(token)
+        return JSONResponse({
+            "access_token": token,
+            "token_type": "Bearer",
+            "expires_in": 86400,
+        })
+
+    return JSONResponse({"error": "unsupported_grant_type"}, status_code=400)
+
+_MCP_TOOLS = [
+    {"name": "get_us_stocks", "description": "Query all US stock positions with P&L by account.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "get_tw_stocks", "description": "Query all Taiwan stock positions with P&L in TWD/USD.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "get_options", "description": "Query all options positions with P&L, DTE, urgency, actions.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "get_quote", "description": "Get real-time quote for a ticker (e.g. NVDA, 2330.TW).", "inputSchema": {"type": "object", "properties": {"ticker": {"type": "string"}}, "required": ["ticker"]}},
+    {"name": "get_networth", "description": "Query net worth: assets, liabilities, bond income.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "get_fx_rate", "description": "Get USD/TWD exchange rate.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "get_trades", "description": "Query trade history with optional filters.", "inputSchema": {"type": "object", "properties": {"ticker": {"type": "string"}, "result": {"type": "string"}, "asset_type": {"type": "string"}, "limit": {"type": "integer"}}}},
+    {"name": "add_trade", "description": "Add trade record. action: Buy/Sell/Open/Close/Roll.", "inputSchema": {"type": "object", "properties": {"date": {"type": "string"}, "ticker": {"type": "string"}, "action": {"type": "string"}, "asset_type": {"type": "string"}, "qty": {"type": "number"}, "price": {"type": "number"}, "total_amount": {"type": "number"}, "reason": {"type": "string"}, "account": {"type": "string"}, "pl": {"type": "number"}, "result": {"type": "string"}, "lesson": {"type": "string"}, "tags": {"type": "array", "items": {"type": "string"}}}, "required": ["date", "ticker", "action", "asset_type", "qty", "price", "total_amount", "reason", "account"]}},
+]
+
+_TOOL_ROUTES = {"get_us_stocks": "/api/stocks/us", "get_tw_stocks": "/api/stocks/tw", "get_options": "/api/options", "get_networth": "/api/networth", "get_fx_rate": "/api/fx"}
+
+
+async def _mcp_call_tool(name: str, args: dict) -> str:
+    async with _httpx.AsyncClient(timeout=15) as c:
+        if name in _TOOL_ROUTES:
+            r = await c.get(f"{_MCP_API}{_TOOL_ROUTES[name]}")
+            r.raise_for_status()
+            return json.dumps(r.json(), indent=2)
+        if name == "get_quote":
+            r = await c.get(f"{_MCP_API}/api/quote/{args.get('ticker', '')}")
+            r.raise_for_status()
+            return json.dumps(r.json(), indent=2)
+        if name == "get_trades":
+            p = {k: v for k, v in args.items() if v}
+            r = await c.get(f"{_MCP_API}/api/trades", params=p)
+            r.raise_for_status()
+            return json.dumps(r.json(), indent=2)
+        if name == "add_trade":
+            r = await c.post(f"{_MCP_API}/api/trades", json=args)
+            r.raise_for_status()
+            return json.dumps(r.json(), indent=2)
+    return json.dumps({"error": f"Unknown tool: {name}"})
+
+
+@app.post("/mcp")
+async def mcp_post(request: Request):
+    body = await request.json()
+    msgs = body if isinstance(body, list) else [body]
+
+    # Notifications/responses only → 202
+    if all(("id" not in m or "method" not in m) for m in msgs):
+        has_request = any("id" in m and "method" in m for m in msgs)
+        if not has_request:
+            return Response(status_code=202)
+
+    msg = msgs[0] if isinstance(body, list) else body
+    method = msg.get("method")
+    rid = msg.get("id")
+    params = msg.get("params", {})
+
+    if method == "initialize":
+        sid = str(uuid.uuid4())
+        return JSONResponse(
+            {"jsonrpc": "2.0", "id": rid, "result": {
+                "protocolVersion": "2025-03-26",
+                "capabilities": {"tools": {"listChanged": False}},
+                "serverInfo": {"name": "portfolio", "version": "2.0.0"},
+            }},
+            media_type="application/json",
+            headers={"Mcp-Session-Id": sid},
+        )
+
+    if method == "tools/list":
+        return JSONResponse({"jsonrpc": "2.0", "id": rid, "result": {"tools": _MCP_TOOLS}}, media_type="application/json")
+
+    if method == "tools/call":
+        try:
+            text = await _mcp_call_tool(params.get("name"), params.get("arguments", {}))
+            return JSONResponse({"jsonrpc": "2.0", "id": rid, "result": {"content": [{"type": "text", "text": text}]}}, media_type="application/json")
+        except Exception as e:
+            return JSONResponse({"jsonrpc": "2.0", "id": rid, "result": {"content": [{"type": "text", "text": f"Error: {e}"}], "isError": True}}, media_type="application/json")
+
+    if method == "ping":
+        return JSONResponse({"jsonrpc": "2.0", "id": rid, "result": {}}, media_type="application/json")
+
+    # Notification (no id) → 202
+    if "id" not in msg:
+        return Response(status_code=202)
+
+    return JSONResponse({"jsonrpc": "2.0", "id": rid, "error": {"code": -32601, "message": f"Method not found: {method}"}}, status_code=400)
+
+
+@app.get("/mcp")
+async def mcp_get():
+    return Response(status_code=405)
+
+
+@app.delete("/mcp")
+async def mcp_delete():
+    return Response(status_code=200)

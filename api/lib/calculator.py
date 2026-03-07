@@ -87,8 +87,8 @@ def calc_option_pl(cost: float, current_value: float | None) -> dict:
     return {"unrealized_pl": pl, "pl_pct": pl_pct}
 
 
-def calc_bond_income(bonds: list[dict], tax_rate: float = 0.30) -> dict:
-    """Calculate annual bond income (gross and net after withholding)."""
+def calc_bond_income(bonds: list[dict], tax_rate: float = 0.24) -> dict:
+    """Calculate annual bond income (gross and net after income tax). US tax resident, 24% bracket."""
     gross = sum(b["face"] * b["coupon"] for b in bonds)
     net = round(gross * (1 - tax_rate), 2)
     return {

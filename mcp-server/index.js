@@ -3,6 +3,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { readFileSync, writeFileSync } from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const API_URL = process.env.PORTFOLIO_API_URL || "https://stock.cwithb.com";
 
@@ -104,6 +109,69 @@ server.tool(
       body: JSON.stringify(params),
     });
     return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+  }
+);
+
+server.tool(
+  "save_snapshot",
+  "抓取所有持倉資料並存入 claude-project-instructions.md，方便手機 Claude App 使用",
+  {},
+  async () => {
+    const [us, tw, options, networth, fx, trades] = await Promise.all([
+      apiCall("/api/stocks/us"),
+      apiCall("/api/stocks/tw"),
+      apiCall("/api/options"),
+      apiCall("/api/networth"),
+      apiCall("/api/fx"),
+      apiCall("/api/trades?limit=20"),
+    ]);
+
+    const filePath = resolve(__dirname, "..", "docs", "claude-project-instructions.md");
+    let content = readFileSync(filePath, "utf-8");
+
+    const marker = "<!-- SNAPSHOT START -->";
+    const markerIdx = content.indexOf(marker);
+    if (markerIdx !== -1) {
+      content = content.substring(0, markerIdx);
+    }
+
+    const now = new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" });
+    const snapshot = `${marker}
+## Portfolio Snapshot (${now})
+
+### US Stocks
+\`\`\`json
+${JSON.stringify(us, null, 2)}
+\`\`\`
+
+### TW Stocks
+\`\`\`json
+${JSON.stringify(tw, null, 2)}
+\`\`\`
+
+### Options
+\`\`\`json
+${JSON.stringify(options, null, 2)}
+\`\`\`
+
+### Net Worth
+\`\`\`json
+${JSON.stringify(networth, null, 2)}
+\`\`\`
+
+### FX Rate
+\`\`\`json
+${JSON.stringify(fx, null, 2)}
+\`\`\`
+
+### Recent Trades
+\`\`\`json
+${JSON.stringify(trades, null, 2)}
+\`\`\`
+`;
+
+    writeFileSync(filePath, content + snapshot, "utf-8");
+    return { content: [{ type: "text", text: `Snapshot saved at ${now}\nFile: ${filePath}` }] };
   }
 );
 
