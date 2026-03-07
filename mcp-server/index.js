@@ -4,7 +4,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-const API_URL = process.env.PORTFOLIO_API_URL || "https://stock-api-sage.vercel.app";
+const API_URL = process.env.PORTFOLIO_API_URL || "https://stock.cwithb.com";
 
 async function apiCall(path, options = {}) {
   const url = `${API_URL}${path}`;

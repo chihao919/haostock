@@ -1,7 +1,9 @@
 """Single FastAPI app for all Vercel serverless endpoints."""
 
+from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, field_validator
 from datetime import datetime
 
@@ -68,6 +70,14 @@ class TradeCreate(BaseModel):
         if v is not None and v not in VALID_RESULTS:
             raise ValueError(f"result must be one of {VALID_RESULTS}")
         return v
+
+
+# --- Dashboard ---
+
+@app.get("/", response_class=HTMLResponse)
+def dashboard():
+    html_path = Path(__file__).parent / "templates" / "index.html"
+    return html_path.read_text(encoding="utf-8")
 
 
 # --- Endpoints ---

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Dashboard</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; padding: 16px; }
+.header { text-align: center; padding: 16px 0; }
+.header h1 { font-size: 20px; color: #f8fafc; }
+.header .networth { font-size: 32px; font-weight: 700; color: #38bdf8; margin: 8px 0; }
+.header .sub { font-size: 14px; color: #94a3b8; }
+.tabs { display: flex; gap: 8px; margin: 16px 0; overflow-x: auto; }
+.tab { padding: 8px 16px; border-radius: 8px; background: #1e293b; color: #94a3b8; border: none; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.tab.active { background: #3b82f6; color: #fff; }
+.section { display: none; }
+.section.active { display: block; }
+.card { background: #1e293b; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.card-title { font-size: 14px; color: #94a3b8; margin-bottom: 12px; font-weight: 600; }
+.row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #334155; }
+.row:last-child { border-bottom: none; }
+.ticker { font-weight: 600; font-size: 15px; }
+.ticker-sub { font-size: 12px; color: #64748b; }
+.price { text-align: right; }
+.price-main { font-size: 15px; font-weight: 600; }
+.pl-pos { color: #4ade80; }
+.pl-neg { color: #f87171; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.badge-red { background: #991b1b; color: #fca5a5; }
+.badge-yellow { background: #92400e; color: #fcd34d; }
+.badge-green { background: #166534; color: #86efac; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.summary-item { background: #1e293b; border-radius: 12px; padding: 14px; }
+.summary-label { font-size: 12px; color: #64748b; }
+.summary-value { font-size: 18px; font-weight: 700; margin-top: 4px; }
+.loading { text-align: center; padding: 40px; color: #64748b; }
+.option-row { padding: 12px 0; border-bottom: 1px solid #334155; }
+.option-row:last-child { border-bottom: none; }
+.option-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.option-details { display: flex; gap: 12px; font-size: 12px; color: #94a3b8; flex-wrap: wrap; }
+.action-tag { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #1e3a5f; color: #93c5fd; }
+.action-urgent { background: #991b1b; color: #fca5a5; }
+.action-close { background: #166534; color: #86efac; }
+.refresh-btn { background: #334155; border: none; color: #94a3b8; padding: 8px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+.account-toggle { cursor: pointer; }
+.account-toggle::after { content: ' ▼'; font-size: 10px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 Portfolio Dashboard</h1>
+  <div class="networth" id="networth-usd">Loading...</div>
+  <div class="sub" id="networth-twd"></div>
+  <div class="sub" id="fx-rate"></div>
+  <button class="refresh-btn" onclick="loadAll()" style="margin-top:8px">↻ Refresh</button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('overview')">總覽</button>
+  <button class="tab" onclick="showTab('us')">美股</button>
+  <button class="tab" onclick="showTab('tw')">台股</button>
+  <button class="tab" onclick="showTab('options')">選擇權</button>
+  <button class="tab" onclick="showTab('income')">收入</button>
+</div>
+
+<div id="overview" class="section active">
+  <div class="summary-grid" id="overview-grid"></div>
+</div>
+
+<div id="us" class="section">
+  <div id="us-content"><div class="loading">Loading...</div></div>
+</div>
+
+<div id="tw" class="section">
+  <div id="tw-content"><div class="loading">Loading...</div></div>
+</div>
+
+<div id="options" class="section">
+  <div id="options-content"><div class="loading">Loading...</div></div>
+</div>
+
+<div id="income" class="section">
+  <div id="income-content"></div>
+</div>
+
+<script>
+const API = '';
+const fmt = (n, d=2) => n != null ? Number(n).toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d}) : '-';
+const fmtInt = n => n != null ? Number(n).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}) : '-';
+const plClass = n => n >= 0 ? 'pl-pos' : 'pl-neg';
+const plSign = n => n >= 0 ? '+' : '';
+
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+async function fetchJSON(path) {
+  const r = await fetch(API + path);
+  return r.json();
+}
+
+async function loadAll() {
+  document.getElementById('networth-usd').textContent = 'Loading...';
+  const [nw, us, tw, opt] = await Promise.all([
+    fetchJSON('/api/networth'),
+    fetchJSON('/api/stocks/us'),
+    fetchJSON('/api/stocks/tw'),
+    fetchJSON('/api/options'),
+  ]);
+  renderNetworth(nw);
+  renderOverview(nw, us, tw, opt);
+  renderUS(us);
+  renderTW(tw);
+  renderOptions(opt);
+  renderIncome(nw);
+}
+
+function renderNetworth(d) {
+  document.getElementById('networth-usd').textContent = '$' + fmt(d.net_worth_usd);
+  document.getElementById('networth-twd').textContent = 'NT$' + fmtInt(d.net_worth_twd);
+  document.getElementById('fx-rate').textContent = 'USD/TWD ' + d.usdtwd_rate;
+}
+
+function renderOverview(nw, us, tw, opt) {
+  const urgentOpts = opt.positions ? opt.positions.filter(p => p.urgency === 'red').length : 0;
+  const grid = document.getElementById('overview-grid');
+  grid.innerHTML = `
+    <div class="summary-item">
+      <div class="summary-label">美股市值</div>
+      <div class="summary-value">$${fmt(nw.assets.us_stocks_usd)}</div>
+      <div class="summary-label ${plClass(us.summary.total_pl)}">${plSign(us.summary.total_pl)}$${fmt(us.summary.total_pl)} (${us.summary.total_pl_pct}%)</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">台股市值</div>
+      <div class="summary-value">NT$${fmtInt(nw.assets.tw_stocks_twd)}</div>
+      <div class="summary-label ${plClass(tw.summary.total_pl_twd)}">${plSign(tw.summary.total_pl_twd)}NT$${fmtInt(tw.summary.total_pl_twd)} (${tw.summary.total_pl_pct}%)</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">債券</div>
+      <div class="summary-value">$${fmt(nw.assets.bonds_cost_usd)}</div>
+      <div class="summary-label">月配息 $${fmt(nw.income.bonds_monthly_net_usd)}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">貸款</div>
+      <div class="summary-value">NT$${fmtInt(nw.liabilities.total_loans_twd)}</div>
+      <div class="summary-label">月付 NT$${fmtInt(nw.liabilities.monthly_payments_twd)}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">選擇權</div>
+      <div class="summary-value">${opt.positions ? opt.positions.length : 0} 筆</div>
+      <div class="summary-label ${urgentOpts > 0 ? 'pl-neg' : ''}">${urgentOpts > 0 ? '⚠️ ' + urgentOpts + ' 筆需處理' : '✅ 無緊急'}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">總資產</div>
+      <div class="summary-value">$${fmt(nw.assets.total_assets_usd)}</div>
+      <div class="summary-label">淨值 $${fmt(nw.net_worth_usd)}</div>
+    </div>
+  `;
+}
+
+function renderUS(d) {
+  let html = '';
+  const s = d.summary;
+  html += `<div class="card"><div class="card-title">總計 — $${fmt(s.total_market_value)} <span class="${plClass(s.total_pl)}">${plSign(s.total_pl)}$${fmt(s.total_pl)} (${s.total_pl_pct}%)</span></div></div>`;
+  for (const [acct, info] of Object.entries(d.accounts)) {
+    html += `<div class="card"><div class="card-title account-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">${acct} — $${fmt(info.total_market_value)} <span class="${plClass(info.total_pl)}">${plSign(info.total_pl)}$${fmt(info.total_pl)} (${info.total_pl_pct}%)</span></div><div>`;
+    for (const p of info.positions) {
+      const hasPrice = p.current_price != null;
+      html += `<div class="row">
+        <div><div class="ticker">${p.ticker}</div><div class="ticker-sub">${p.shares} 股 @ $${fmt(p.avg_cost)}</div></div>
+        <div class="price">${hasPrice ? `<div class="price-main">$${fmt(p.current_price)}</div><div class="${plClass(p.unrealized_pl)}" style="font-size:12px">${plSign(p.unrealized_pl)}$${fmt(p.unrealized_pl)} (${p.pl_pct}%)</div>` : '<div style="color:#64748b">N/A</div>'}</div>
+      </div>`;
+    }
+    html += '</div></div>';
+  }
+  document.getElementById('us-content').innerHTML = html;
+}
+
+function renderTW(d) {
+  let html = '';
+  const s = d.summary;
+  html += `<div class="card"><div class="card-title">總計 — NT$${fmtInt(s.total_market_value_twd)} ($${fmt(s.total_market_value_usd)}) <span class="${plClass(s.total_pl_twd)}">${plSign(s.total_pl_twd)}NT$${fmtInt(s.total_pl_twd)} (${s.total_pl_pct}%)</span></div></div>`;
+  for (const [acct, info] of Object.entries(d.accounts)) {
+    html += `<div class="card"><div class="card-title account-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">${acct} — NT$${fmtInt(info.total_market_value_twd)} <span class="${plClass(info.total_pl_twd)}">(${info.total_pl_pct}%)</span></div><div>`;
+    for (const p of info.positions) {
+      const hasPrice = p.current_price_twd != null;
+      html += `<div class="row">
+        <div><div class="ticker">${p.ticker}</div><div class="ticker-sub">${p.name} · ${fmtInt(p.shares)}股 @ ${fmt(p.avg_cost_twd,1)}</div></div>
+        <div class="price">${hasPrice ? `<div class="price-main">${fmt(p.current_price_twd,1)}</div><div class="${plClass(p.unrealized_pl_twd)}" style="font-size:12px">${plSign(p.unrealized_pl_twd)}NT$${fmtInt(p.unrealized_pl_twd)} (${p.pl_pct}%)</div>` : '<div style="color:#64748b">N/A</div>'}</div>
+      </div>`;
+    }
+    html += '</div></div>';
+  }
+  document.getElementById('tw-content').innerHTML = html;
+}
+
+function renderOptions(d) {
+  let html = '';
+  if (d.summary) {
+    const s = d.summary;
+    html += `<div class="card"><div class="card-title">總計 — 成本 $${fmt(s.total_cost_basis)} ${s.total_pl != null ? `<span class="${plClass(s.total_pl)}">${plSign(s.total_pl)}$${fmt(s.total_pl)} (${s.total_pl_pct}%)</span>` : ''}</div></div>`;
+  }
+  html += '<div class="card">';
+  for (const p of (d.positions || [])) {
+    const urgBadge = p.urgency === 'red' ? 'badge-red' : p.urgency === 'yellow' ? 'badge-yellow' : 'badge-green';
+    const actionClass = p.action.includes('URGENT') || p.action === 'EXPIRED' ? 'action-urgent' : p.action.includes('Close') || p.action === 'Let expire' ? 'action-close' : '';
+    html += `<div class="option-row">
+      <div class="option-header">
+        <div><span class="ticker">${p.ticker}</span> <span style="color:#94a3b8">${p.strike} ${p.type.toUpperCase()}</span> <span class="badge ${urgBadge}">${p.dte}d</span></div>
+        <span class="action-tag ${actionClass}">${p.action}</span>
+      </div>
+      <div class="option-details">
+        <span>${p.expiry}</span>
+        <span>${p.itm_otm}</span>
+        <span>Qty: ${p.qty}</span>
+        <span>Cost: $${fmt(p.cost_basis)}</span>
+        ${p.unrealized_pl != null ? `<span class="${plClass(p.unrealized_pl)}">${plSign(p.unrealized_pl)}$${fmt(p.unrealized_pl)} (${p.pl_pct}%)</span>` : ''}
+      </div>
+    </div>`;
+  }
+  html += '</div>';
+  document.getElementById('options-content').innerHTML = html;
+}
+
+function renderIncome(nw) {
+  const inc = nw.income;
+  const lia = nw.liabilities;
+  document.getElementById('income-content').innerHTML = `
+    <div class="card">
+      <div class="card-title">債券配息收入</div>
+      <div class="row"><div>年化毛收入</div><div class="price-main">$${fmt(inc.bonds_annual_gross_usd)}</div></div>
+      <div class="row"><div>預扣稅率</div><div>${inc.withholding_tax_rate}</div></div>
+      <div class="row"><div>年化淨收入</div><div class="price-main pl-pos">$${fmt(inc.bonds_annual_net_usd)}</div></div>
+      <div class="row"><div>月淨收入</div><div class="price-main pl-pos">$${fmt(inc.bonds_monthly_net_usd)}</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">貸款支出</div>
+      <div class="row"><div>貸款餘額</div><div class="price-main">NT$${fmtInt(lia.total_loans_twd)}</div></div>
+      <div class="row"><div>月付金</div><div class="price-main pl-neg">NT$${fmtInt(lia.monthly_payments_twd)}</div></div>
+      <div class="row"><div>月付金 (USD)</div><div class="price-main pl-neg">$${fmt(lia.monthly_payments_twd / nw.usdtwd_rate)}</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">月現金流</div>
+      <div class="row"><div>債券配息</div><div class="pl-pos">+$${fmt(inc.bonds_monthly_net_usd)}</div></div>
+      <div class="row"><div>貸款月付</div><div class="pl-neg">-$${fmt(lia.monthly_payments_twd / nw.usdtwd_rate)}</div></div>
+      <div class="row"><div><strong>淨現金流</strong></div><div class="price-main ${plClass(inc.bonds_monthly_net_usd - lia.monthly_payments_twd / nw.usdtwd_rate)}">${plSign(inc.bonds_monthly_net_usd - lia.monthly_payments_twd / nw.usdtwd_rate)}$${fmt(inc.bonds_monthly_net_usd - lia.monthly_payments_twd / nw.usdtwd_rate)}</div></div>
+    </div>
+  `;
+}
+
+loadAll();
+</script>
+</body>
+</html>
