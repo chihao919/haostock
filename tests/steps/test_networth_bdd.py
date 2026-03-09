@@ -71,9 +71,9 @@ async def test_bond_income_withholding(notion_mocks, prices):
     data = resp.json()
     gross = data["income"]["bonds_annual_gross_usd"]
     net = data["income"]["bonds_annual_net_usd"]
-    assert net == round(gross * 0.70, 2)
+    assert net == round(gross * 0.76, 2)
     assert data["income"]["bonds_monthly_net_usd"] == round(net / 12, 2)
-    assert data["income"]["withholding_tax_rate"] == "30%"
+    assert data["income"]["withholding_tax_rate"] == "24%"
 
 
 @pytest.mark.asyncio

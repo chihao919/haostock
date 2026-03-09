@@ -188,8 +188,8 @@ class TestCalcBondIncome:
         bonds = [{"face": 280000, "coupon": 0.05699}]
         result = calc_bond_income(bonds)
         assert result["annual_gross"] == 15957.20
-        assert result["annual_net"] == 11170.04
-        assert result["withholding_tax_rate"] == "30%"
+        assert result["annual_net"] == round(15957.20 * 0.76, 2)
+        assert result["withholding_tax_rate"] == "24%"
 
     def test_multiple_bonds(self):
         bonds = [

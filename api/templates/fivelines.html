@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>樂活五線譜 — Happy Five Lines</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1e293b; }
+.container { display: flex; min-height: 100vh; }
+
+/* Left panel */
+.panel {
+  width: 360px; min-width: 360px; background: #f5f5f5; padding: 20px;
+  overflow-y: auto; display: flex; flex-direction: column; gap: 16px;
+}
+
+/* Cards in left panel */
+.card {
+  background: #fff; border-radius: 16px; padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.card h1 { font-size: 24px; color: #6366f1; margin-bottom: 4px; text-align: center; }
+.card .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 20px; text-align: center; }
+
+/* Form rows */
+.form-row {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+}
+.form-row label {
+  font-size: 14px; font-weight: 600; color: #475569; white-space: nowrap; min-width: 100px;
+}
+.form-row input[type="text"], .form-row select {
+  flex: 1; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0;
+  background: #fff; color: #1e293b; font-size: 15px; outline: none;
+}
+.form-row input[type="text"]:focus, .form-row select:focus { border-color: #6366f1; }
+
+/* Buttons */
+.btn-row { display: flex; gap: 10px; margin-top: 6px; }
+.btn {
+  flex: 1; padding: 12px 16px; border-radius: 10px; border: none; font-size: 14px;
+  font-weight: 700; cursor: pointer; transition: all 0.2s; text-align: center;
+}
+.btn-secondary { background: #1e293b; color: #fff; }
+.btn-secondary:hover { background: #334155; }
+.btn-primary { background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; }
+.btn-primary:hover { background: linear-gradient(135deg, #dc2626, #ea580c); }
+
+/* Quick picks card */
+.quick-tabs {
+  display: flex; gap: 0; margin-bottom: 4px;
+}
+.quick-tab {
+  flex: 1; padding: 10px 8px; font-size: 13px; font-weight: 600; color: #94a3b8;
+  cursor: pointer; background: none; border: none; border-bottom: 2px solid transparent;
+  transition: color 0.2s;
+}
+.quick-tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+.quick-tab:hover { color: #6366f1; }
+.quick-list { display: none; }
+.quick-list.active { display: block; }
+.quick-item {
+  display: flex; align-items: center; padding: 14px 4px; cursor: pointer;
+  transition: background 0.15s; gap: 14px; border-bottom: 1px solid #f1f5f9;
+}
+.quick-item:last-child { border-bottom: none; }
+.quick-item:hover { background: #f8fafc; }
+.quick-item .code {
+  font-size: 14px; font-weight: 700; color: #6366f1; min-width: 56px;
+  background: #eef2ff; padding: 4px 8px; border-radius: 6px; text-align: center;
+}
+.quick-item .name { font-size: 14px; color: #64748b; }
+
+/* Tips card */
+.tips-card { padding: 20px !important; border: 1.5px dashed #e2e8f0; box-shadow: none; }
+.tips-title { font-size: 15px; font-weight: 700; color: #475569; margin-bottom: 12px; }
+.tips-section { margin-bottom: 12px; }
+.tips-section:last-child { margin-bottom: 0; }
+.tips-heading { font-size: 13px; font-weight: 700; color: #6366f1; margin-bottom: 6px; }
+.tips-list { padding-left: 18px; margin: 0; }
+.tips-list li { font-size: 12px; color: #64748b; line-height: 1.6; margin-bottom: 4px; }
+.tips-list li:last-child { margin-bottom: 0; }
+.text-red { color: #ef4444; font-weight: 600; }
+.text-green { color: #16a34a; font-weight: 600; }
+
+/* Right panel */
+.chart-area { flex: 1; padding: 24px; background: #fff; display: flex; flex-direction: column; }
+
+/* Header */
+.chart-header { display: flex; justify-content: center; gap: 48px; margin-bottom: 12px; flex-wrap: wrap; }
+.header-item { text-align: center; }
+.header-label { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+.header-value { font-size: 24px; font-weight: 700; color: #1e293b; }
+.chart-signal { font-size: 24px; font-weight: 700; }
+.signal-strong-buy { color: #16a34a; }
+.signal-buy { color: #22c55e; }
+.signal-neutral { color: #f59e0b; }
+.signal-sell { color: #f87171; }
+.signal-strong-sell { color: #dc2626; }
+
+/* View mode tabs */
+.view-tabs {
+  display: flex; justify-content: center; gap: 0; margin-bottom: 12px;
+}
+.view-tab {
+  padding: 8px 24px; font-size: 14px; font-weight: 600; cursor: pointer;
+  border: 1.5px solid #e2e8f0; background: #fff; color: #64748b; transition: all 0.2s;
+}
+.view-tab:first-child { border-radius: 8px 0 0 8px; }
+.view-tab:last-child { border-radius: 0 8px 8px 0; border-left: none; }
+.view-tab.active { background: #f8fafc; color: #1e293b; border-color: #94a3b8; }
+.view-tab:hover { color: #1e293b; }
+
+.chart-meta { font-size: 12px; color: #94a3b8; text-align: center; margin-bottom: 12px; }
+
+/* Chart area */
+.chart-container { flex: 1; position: relative; min-height: 400px; display: flex; }
+.chart-inner { display: flex; flex: 1; position: relative; }
+.chart-wrapper { flex: 1; position: relative; }
+#fiveChart { width: 100% !important; }
+
+/* Zoom controls */
+.zoom-controls {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 4px; z-index: 10;
+}
+.zoom-btn {
+  width: 32px; height: 32px; border-radius: 6px; border: 1px solid #e2e8f0;
+  background: #fff; color: #475569; font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: background 0.15s;
+}
+.zoom-btn:hover { background: #f1f5f9; }
+
+/* Right side badges */
+.line-badges { width: 56px; display: flex; flex-direction: column; justify-content: center; position: relative; margin-left: 4px; }
+.line-badge {
+  position: absolute; right: 0; padding: 2px 6px; border-radius: 3px;
+  font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap;
+  transform: translateY(-50%);
+}
+.badge-p2s { background: #dc2626; }
+.badge-p1s { background: #f97316; }
+.badge-mean { background: #6b7280; }
+.badge-m1s { background: #22c55e; }
+.badge-m2s { background: #059669; }
+.badge-price { background: #1e293b; }
+.badge-ch-upper { background: #ec4899; }
+.badge-ch-middle { background: #9ca3af; }
+.badge-ch-lower { background: #3b82f6; }
+
+/* Loading */
+.loading { display: none; text-align: center; padding: 40px; color: #94a3b8; }
+.loading.active { display: block; }
+.spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Password gate */
+.password-gate {
+  display: flex; align-items: center; justify-content: center; min-height: 100vh;
+  background: #f5f5f5;
+}
+.pw-box {
+  background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  text-align: center; width: 320px;
+}
+.pw-box h2 { font-size: 22px; color: #6366f1; margin-bottom: 8px; }
+.pw-box p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; }
+.pw-box input {
+  width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0;
+  font-size: 16px; text-align: center; outline: none;
+}
+.pw-box input:focus { border-color: #6366f1; }
+.pw-error { color: #ef4444; font-size: 13px; margin-top: 8px; min-height: 20px; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .container { flex-direction: column; }
+  .panel { width: 100%; min-width: unset; }
+  .chart-wrapper { min-height: 300px; }
+  .chart-header { gap: 24px; }
+  .line-badges { width: 48px; }
+}
+</style>
+</head>
+<body>
+<!-- Password Gate -->
+<div class="password-gate" id="passwordGate">
+  <div class="pw-box">
+    <h2>樂活五線譜</h2>
+    <p>請輸入密碼</p>
+    <input type="password" id="pwInput" placeholder="密碼" autofocus>
+    <button class="btn btn-primary" onclick="checkPassword()" style="width:100%;margin-top:12px">進入</button>
+    <div class="pw-error" id="pwError"></div>
+  </div>
+</div>
+
+<div class="container" id="mainApp" style="display:none">
+  <!-- Left Panel -->
+  <div class="panel">
+    <!-- Form Card -->
+    <div class="card">
+      <h1>樂活五線譜</h1>
+      <p class="subtitle">股價趨勢與情緒分析</p>
+
+      <div class="form-row">
+        <label for="ticker">輸入股票代碼：</label>
+        <input type="text" id="ticker" placeholder="VOO, 0050, 2330" value="0050">
+      </div>
+
+      <div class="form-row">
+        <label for="period">選擇分析期長：</label>
+        <select id="period">
+          <option value="1">短期 (1年)</option>
+          <option value="2">中期 (2年)</option>
+          <option value="3.5" selected>長期 (3.5年)</option>
+          <option value="5">超長期 (5年)</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="toggleAdvanced()">進階設定</button>
+        <button class="btn btn-primary" onclick="analyze()">開始分析</button>
+      </div>
+    </div>
+
+    <!-- Quick Picks Card -->
+    <div class="card" style="padding: 16px 20px;">
+      <div class="quick-tabs">
+        <button class="quick-tab active" data-tab="popular">熱門分析 🔥</button>
+        <button class="quick-tab" data-tab="etf">指數ETF 💎</button>
+        <button class="quick-tab" data-tab="watchlist">追蹤清單 📋</button>
+      </div>
+      <div class="quick-list active" id="tab-popular">
+        <div class="quick-item" data-ticker="0050.TW"><span class="code">0050</span><span class="name">元大台灣50</span></div>
+        <div class="quick-item" data-ticker="2330.TW"><span class="code">2330</span><span class="name">台積電</span></div>
+        <div class="quick-item" data-ticker="QQQ"><span class="code">QQQ</span><span class="name">Invesco QQQ Trust</span></div>
+        <div class="quick-item" data-ticker="VOO"><span class="code">VOO</span><span class="name">Vanguard S&P 500 ETF</span></div>
+        <div class="quick-item" data-ticker="SPY"><span class="code">SPY</span><span class="name">SPDR S&P 500 ETF</span></div>
+      </div>
+      <div class="quick-list" id="tab-etf">
+        <div class="quick-item" data-ticker="VTI"><span class="code">VTI</span><span class="name">Vanguard Total Stock Market</span></div>
+        <div class="quick-item" data-ticker="VXUS"><span class="code">VXUS</span><span class="name">Vanguard Intl Stock</span></div>
+        <div class="quick-item" data-ticker="BND"><span class="code">BND</span><span class="name">Vanguard Total Bond</span></div>
+        <div class="quick-item" data-ticker="0056.TW"><span class="code">0056</span><span class="name">元大高股息</span></div>
+        <div class="quick-item" data-ticker="00878.TW"><span class="code">00878</span><span class="name">國泰永續高股息</span></div>
+      </div>
+      <div class="quick-list" id="tab-watchlist">
+        <div class="quick-item" data-ticker="GOOG"><span class="code">GOOG</span><span class="name">Alphabet</span></div>
+        <div class="quick-item" data-ticker="TSM"><span class="code">TSM</span><span class="name">Taiwan Semi ADR</span></div>
+        <div class="quick-item" data-ticker="CCJ"><span class="code">CCJ</span><span class="name">Cameco</span></div>
+        <div class="quick-item" data-ticker="MU"><span class="code">MU</span><span class="name">Micron</span></div>
+        <div class="quick-item" data-ticker="NVDA"><span class="code">NVDA</span><span class="name">NVIDIA</span></div>
+      </div>
+    </div>
+
+    <!-- Tips Card -->
+    <div class="card tips-card" id="tipsCard">
+      <div class="tips-title">📖 使用技巧</div>
+      <div class="tips-content" id="tipsFivelines">
+        <div class="tips-heading">樂活五線譜</div>
+        <ul class="tips-list">
+          <li>當股價觸及五線譜最上緣或最下緣時，若同時也突破了樂活通道，可能代表趨勢延續，可等回到通道內再操作。</li>
+          <li>建議使用在指數型 ETF 或具有趨勢性的大型股票，搭配基本面分析。</li>
+          <li>不應單獨作為買賣依據，請結合其他技術指標和基本面分析。</li>
+        </ul>
+      </div>
+      <div class="tips-content" id="tipsChannel" style="display:none">
+        <div class="tips-heading">樂活通道</div>
+        <ul class="tips-list">
+          <li>樂活通道是更敏感的指標，用來輔助判斷短期內的超買超賣。</li>
+          <li>股價突破通道上緣 → 短期可能<span class="text-red">過熱</span>。</li>
+          <li>股價跌破通道下緣 → 短期可能<span class="text-green">過冷</span>。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="chart-area">
+    <div class="chart-header">
+      <div class="header-item">
+        <div class="header-label">股票代碼</div>
+        <div class="header-value" id="displayTicker">—</div>
+      </div>
+      <div class="header-item">
+        <div class="header-label">股票價格</div>
+        <div class="header-value" id="displayPrice">—</div>
+      </div>
+      <div class="header-item">
+        <div class="header-label">市場情緒</div>
+        <div class="chart-signal" id="displaySignal">—</div>
+      </div>
+    </div>
+
+    <!-- View mode tabs -->
+    <div class="view-tabs">
+      <button class="view-tab active" data-mode="fivelines">樂活五線譜</button>
+      <button class="view-tab" data-mode="channel">樂活通道</button>
+    </div>
+
+    <div class="chart-meta" id="displayMeta"></div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p style="margin-top:12px">分析中...</p>
+    </div>
+
+    <div class="chart-container">
+      <div class="zoom-controls">
+        <button class="zoom-btn" onclick="zoomIn()" title="放大">+</button>
+        <button class="zoom-btn" onclick="zoomOut()" title="縮小">−</button>
+        <button class="zoom-btn" onclick="zoomReset()" title="重置">↺</button>
+      </div>
+      <div class="chart-inner">
+        <div class="chart-wrapper">
+          <canvas id="fiveChart"></canvas>
+        </div>
+        <div class="line-badges" id="lineBadges"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Password gate
+let authLevel = sessionStorage.getItem('fl_auth_level') || '';
+
+function enterApp() {
+  document.getElementById('passwordGate').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'flex';
+  applyAuthLevel();
+  // Auto-analyze 0050
+  document.getElementById('ticker').value = '0050';
+  analyze();
+}
+
+function applyAuthLevel() {
+  const watchlistTab = document.querySelector('[data-tab="watchlist"]');
+  if (authLevel !== 'full') {
+    watchlistTab.style.opacity = '0.4';
+    watchlistTab.style.cursor = 'not-allowed';
+    watchlistTab.dataset.locked = 'true';
+  } else {
+    watchlistTab.style.opacity = '';
+    watchlistTab.style.cursor = '';
+    watchlistTab.dataset.locked = '';
+  }
+}
+
+if (authLevel) {
+  enterApp();
+}
+
+document.getElementById('pwInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPassword();
+});
+
+async function checkPassword() {
+  const pw = document.getElementById('pwInput').value;
+  try {
+    const resp = await fetch('/api/fivelines/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      authLevel = data.level || 'basic';
+      sessionStorage.setItem('fl_auth_level', authLevel);
+      enterApp();
+    } else {
+      document.getElementById('pwError').textContent = '密碼錯誤';
+    }
+  } catch {
+    document.getElementById('pwError').textContent = '連線錯誤';
+  }
+}
+
+let chart = null;
+let lastData = null;
+let viewMode = 'fivelines'; // 'fivelines' or 'channel'
+
+const SIGNAL_CLASSES = {
+  '強烈買入': 'signal-strong-buy',
+  '加碼買入': 'signal-buy',
+  '中性': 'signal-neutral',
+  '賣出': 'signal-sell',
+  '強烈賣出': 'signal-strong-sell',
+};
+
+// View mode tabs
+document.querySelectorAll('.view-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    viewMode = tab.dataset.mode;
+    // Toggle tips
+    document.getElementById('tipsFivelines').style.display = viewMode === 'fivelines' ? '' : 'none';
+    document.getElementById('tipsChannel').style.display = viewMode === 'channel' ? '' : 'none';
+    if (lastData) renderResult(lastData);
+  });
+});
+
+// Quick tabs
+document.querySelectorAll('.quick-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    if (tab.dataset.locked === 'true') return;
+    document.querySelectorAll('.quick-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.quick-list').forEach(l => l.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// Quick picks
+document.querySelectorAll('.quick-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.getElementById('ticker').value = item.dataset.ticker;
+    analyze();
+  });
+});
+
+// Enter key
+document.getElementById('ticker').addEventListener('keydown', e => {
+  if (e.key === 'Enter') analyze();
+});
+
+// Advanced settings placeholder
+function toggleAdvanced() {
+  alert('進階設定功能開發中...');
+}
+
+async function analyze() {
+  const ticker = document.getElementById('ticker').value.trim();
+  if (!ticker) return;
+
+  const years = document.getElementById('period').value;
+  const loading = document.getElementById('loading');
+
+  loading.classList.add('active');
+  document.getElementById('displayTicker').textContent = ticker.toUpperCase();
+  document.getElementById('displayPrice').textContent = '...';
+  document.getElementById('displaySignal').textContent = '...';
+  document.getElementById('displaySignal').className = 'chart-signal';
+  document.getElementById('lineBadges').innerHTML = '';
+
+  try {
+    const resp = await fetch(`/api/fivelines/${encodeURIComponent(ticker)}?years=${years}&include_history=true`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    lastData = data;
+    renderResult(data);
+  } catch (err) {
+    document.getElementById('displayPrice').textContent = '錯誤';
+    document.getElementById('displaySignal').textContent = err.message;
+    document.getElementById('displaySignal').className = 'chart-signal signal-sell';
+  } finally {
+    loading.classList.remove('active');
+  }
+}
+
+function renderResult(data) {
+  // Header
+  document.getElementById('displayTicker').textContent = data.ticker;
+  document.getElementById('displayPrice').textContent = '$' + data.current_price.toLocaleString();
+
+  const signalEl = document.getElementById('displaySignal');
+  if (viewMode === 'channel' && data.channel) {
+    signalEl.textContent = data.channel.signal;
+    const chColors = { '突破上緣': '#dc2626', '跌破下緣': '#16a34a', '通道內': '#64748b' };
+    signalEl.style.color = chColors[data.channel.signal] || '#64748b';
+    signalEl.className = 'chart-signal';
+  } else {
+    signalEl.textContent = data.signal;
+    signalEl.className = 'chart-signal ' + (SIGNAL_CLASSES[data.signal] || '');
+    signalEl.style.color = '';
+  }
+
+  document.getElementById('displayMeta').textContent =
+    `期間: ${data.data_period} | σ = ${data.sigma} | 日斜率 = ${data.slope_daily} | 資料點: ${data.data_points}`;
+
+  if (!data.history || !data.history.length) return;
+
+  const showFiveLines = viewMode === 'fivelines';
+  const showChannel = viewMode === 'channel';
+
+  const labels = data.history.map(h => h.date);
+  const closes = data.history.map(h => h.close);
+  const p2s = data.history.map(h => h.plus_2sigma);
+  const p1s = data.history.map(h => h.plus_1sigma);
+  const meanArr = data.history.map(h => h.mean);
+  const m1s = data.history.map(h => h.minus_1sigma);
+  const m2s = data.history.map(h => h.minus_2sigma);
+  const chUpper = data.history.map(h => h.channel_upper || null);
+  const chMiddle = data.history.map(h => h.channel_middle || null);
+  const chLower = data.history.map(h => h.channel_lower || null);
+
+  if (chart) chart.destroy();
+
+  const datasets = [];
+
+  if (showFiveLines) {
+    datasets.push(
+      { label: '+2σ 極度樂觀', data: p2s, borderColor: '#dc2626', borderWidth: 2, pointRadius: 0, tension: 0.1 },
+      { label: '+1σ 樂觀', data: p1s, borderColor: '#f97316', borderWidth: 2, pointRadius: 0, borderDash: [6, 3], tension: 0.1 },
+      { label: '趨勢線', data: meanArr, borderColor: '#6b7280', borderWidth: 2, pointRadius: 0, tension: 0.1 },
+      { label: '-1σ 悲觀', data: m1s, borderColor: '#22c55e', borderWidth: 2, pointRadius: 0, borderDash: [6, 3], tension: 0.1 },
+      { label: '-2σ 極度悲觀', data: m2s, borderColor: '#059669', borderWidth: 2, pointRadius: 0, tension: 0.1 },
+    );
+  }
+
+  if (showChannel) {
+    datasets.push(
+      { label: '通道上緣', data: chUpper, borderColor: '#ec4899', borderWidth: 2, pointRadius: 0, tension: 0.3, spanGaps: true },
+      { label: '通道中線 (100D)', data: chMiddle, borderColor: '#9ca3af', borderWidth: 2, pointRadius: 0, tension: 0.3, spanGaps: true },
+      { label: '通道下緣', data: chLower, borderColor: '#3b82f6', borderWidth: 2, pointRadius: 0, tension: 0.3, spanGaps: true },
+    );
+  }
+
+  // Price always last (on top)
+  datasets.push(
+    { label: '價格', data: closes, borderColor: '#0f172a', borderWidth: 2.5, pointRadius: 0, tension: 0.1 },
+  );
+
+  const ctx = document.getElementById('fiveChart').getContext('2d');
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#fff',
+          titleColor: '#1e293b',
+          bodyColor: '#475569',
+          borderColor: '#e2e8f0',
+          borderWidth: 1,
+          padding: 12,
+          boxPadding: 4,
+          usePointStyle: true,
+          callbacks: {
+            title: function(items) { return items[0].label; },
+            label: function(ctx) {
+              const val = Math.round(ctx.parsed.y);
+              return ` ${ctx.dataset.label}: ${val}`;
+            },
+            labelColor: function(ctx) {
+              return {
+                borderColor: ctx.dataset.borderColor,
+                backgroundColor: ctx.dataset.borderColor,
+                borderWidth: 2, borderRadius: 4,
+              };
+            },
+          },
+        },
+        zoom: {
+          pan: { enabled: true, mode: 'x' },
+          zoom: {
+            wheel: { enabled: true },
+            pinch: { enabled: true },
+            mode: 'x',
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#94a3b8', maxTicksLimit: 8, maxRotation: 0,
+            callback: function(val) {
+              const label = this.getLabelForValue(val);
+              return label ? label.substring(0, 7) : '';
+            },
+          },
+          grid: { color: '#cbd5e1', lineWidth: 1 },
+        },
+        y: {
+          position: 'left',
+          ticks: { color: '#94a3b8' },
+          grid: { color: '#cbd5e1', lineWidth: 1 },
+        },
+      },
+    },
+  });
+
+  requestAnimationFrame(() => updateBadges(data));
+}
+
+function updateBadges(data) {
+  const badges = document.getElementById('lineBadges');
+  badges.innerHTML = '';
+
+  if (!chart || !chart.scales || !chart.scales.y) return;
+
+  const yScale = chart.scales.y;
+  const chartArea = chart.chartArea;
+
+  const entries = [
+    { key: 'price', val: data.current_price, cls: 'badge-price' },
+  ];
+
+  if (viewMode === 'fivelines') {
+    const lines = data.lines;
+    entries.push(
+      { key: 'plus_2sigma', val: lines.plus_2sigma, cls: 'badge-p2s' },
+      { key: 'plus_1sigma', val: lines.plus_1sigma, cls: 'badge-p1s' },
+      { key: 'mean', val: lines.mean, cls: 'badge-mean' },
+      { key: 'minus_1sigma', val: lines.minus_1sigma, cls: 'badge-m1s' },
+      { key: 'minus_2sigma', val: lines.minus_2sigma, cls: 'badge-m2s' },
+    );
+  }
+
+  if (viewMode === 'channel' && data.channel) {
+    entries.push(
+      { key: 'ch_upper', val: data.channel.upper, cls: 'badge-ch-upper' },
+      { key: 'ch_middle', val: data.channel.middle, cls: 'badge-ch-middle' },
+      { key: 'ch_lower', val: data.channel.lower, cls: 'badge-ch-lower' },
+    );
+  }
+
+  entries.sort((a, b) => b.val - a.val);
+
+  for (const e of entries) {
+    const pixel = yScale.getPixelForValue(e.val);
+    const top = pixel - chartArea.top;
+
+    const badge = document.createElement('div');
+    badge.className = 'line-badge ' + e.cls;
+    badge.textContent = Math.round(e.val);
+    badge.style.top = top + 'px';
+    badges.appendChild(badge);
+  }
+
+  badges.style.paddingTop = chartArea.top + 'px';
+}
+
+window.addEventListener('resize', () => {
+  if (lastData) requestAnimationFrame(() => updateBadges(lastData));
+});
+
+// Zoom controls
+function zoomIn() { if (chart) chart.zoom(1.2); }
+function zoomOut() { if (chart) chart.zoom(0.8); }
+function zoomReset() { if (chart) chart.resetZoom(); }
+</script>
+</body>
+</html>

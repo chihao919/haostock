@@ -49,12 +49,28 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </head>
 <body>
 
+<div id="login-screen" style="display:flex; justify-content:center; align-items:center; height:100vh;">
+  <div style="text-align:center;">
+    <h1 style="font-size:24px; margin-bottom:24px;">🔒 Portfolio Dashboard</h1>
+    <input id="pw-input" type="password" placeholder="Password" autofocus
+      style="background:#1e293b; border:1px solid #334155; color:#e2e8f0; padding:12px 16px; border-radius:8px; font-size:16px; width:200px; text-align:center;"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <br>
+    <button onclick="doLogin()" style="margin-top:12px; background:#3b82f6; border:none; color:#fff; padding:10px 32px; border-radius:8px; font-size:14px; cursor:pointer;">Enter</button>
+    <div id="pw-error" style="color:#f87171; margin-top:12px; font-size:13px;"></div>
+    <div style="margin-top:32px; border-top:1px solid #334155; padding-top:20px;">
+      <a href="/fivelines" style="display:inline-block; background:#1e293b; border:1px solid #334155; color:#94a3b8; padding:10px 24px; border-radius:8px; font-size:14px; text-decoration:none;">📈 樂活五線譜</a>
+    </div>
+  </div>
+</div>
+
+<div id="app" style="display:none;">
 <div class="header">
   <h1>📊 Portfolio Dashboard</h1>
   <div class="networth" id="networth-usd">Loading...</div>
   <div class="sub" id="networth-twd"></div>
   <div class="sub" id="fx-rate"></div>
-  <button class="refresh-btn" onclick="loadAll()" style="margin-top:8px">↻ Refresh</button>
+  <span id="cache-status" style="display:block; margin-top:8px; font-size:12px; color:#64748b;"></span>
 </div>
 
 <div class="tabs">
@@ -99,19 +115,32 @@ function showTab(id) {
   event.target.classList.add('active');
 }
 
+const CACHE_KEY = 'dashboard_cache';
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
 async function fetchJSON(path) {
-  const r = await fetch(API + path);
+  const key = sessionStorage.getItem('dashboard_key') || '';
+  const r = await fetch(API + path, {headers: {'x-api-key': key}});
+  if (r.status === 401) { sessionStorage.clear(); location.reload(); return {}; }
   return r.json();
 }
 
-async function loadAll() {
-  document.getElementById('networth-usd').textContent = 'Loading...';
-  const [nw, us, tw, opt] = await Promise.all([
-    fetchJSON('/api/networth'),
-    fetchJSON('/api/stocks/us'),
-    fetchJSON('/api/stocks/tw'),
-    fetchJSON('/api/options'),
-  ]);
+function getCachedData() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    return cached;
+  } catch(e) { return null; }
+}
+
+function saveCacheData(nw, us, tw, opt) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ts: Date.now(), nw, us, tw, opt}));
+  } catch(e) {}
+}
+
+function renderAll(nw, us, tw, opt) {
   renderNetworth(nw);
   renderOverview(nw, us, tw, opt);
   renderUS(us);
@@ -120,45 +149,108 @@ async function loadAll() {
   renderIncome(nw);
 }
 
+function showStatus(text, color) {
+  const el = document.getElementById('cache-status');
+  if (el) { el.textContent = text; el.style.color = color || '#64748b'; }
+}
+
+function isSameDay(ts) {
+  const cached = new Date(ts);
+  const now = new Date();
+  return cached.toDateString() === now.toDateString();
+}
+
+async function loadAll(forceRefresh) {
+  const cached = getCachedData();
+
+  // Use cache if same day and not forced
+  if (cached && !forceRefresh && isSameDay(cached.ts)) {
+    renderAll(cached.nw, cached.us, cached.tw, cached.opt);
+    const t = new Date(cached.ts).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    showStatus(`${t} 更新`, '#94a3b8');
+    return;
+  }
+
+  // Show cached data first while loading (if available but stale)
+  if (cached) {
+    renderAll(cached.nw, cached.us, cached.tw, cached.opt);
+    showStatus('更新中...', '#fcd34d');
+  } else {
+    document.getElementById('networth-usd').textContent = 'Loading...';
+  }
+
+  try {
+    const [nw, us, tw, opt] = await Promise.all([
+      fetchJSON('/api/networth'),
+      fetchJSON('/api/stocks/us'),
+      fetchJSON('/api/stocks/tw'),
+      fetchJSON('/api/options'),
+    ]);
+    if (nw.net_worth_usd) {
+      renderAll(nw, us, tw, opt);
+      saveCacheData(nw, us, tw, opt);
+      const t = new Date().toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+      showStatus(`${t} 更新`, '#4ade80');
+    }
+  } catch(e) {
+    if (cached) {
+      const t = new Date(cached.ts).toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+      showStatus(`${t} (離線)`, '#f87171');
+    }
+  }
+}
+
 function renderNetworth(d) {
-  document.getElementById('networth-usd').textContent = '$' + fmt(d.net_worth_usd);
-  document.getElementById('networth-twd').textContent = 'NT$' + fmtInt(d.net_worth_twd);
+  document.getElementById('networth-usd').innerHTML = 'USD $' + fmt(d.net_worth_usd) + '<div style="font-size:16px;color:#94a3b8;margin-top:4px">NT$ ' + fmtInt(d.net_worth_twd) + '</div>';
+  document.getElementById('networth-twd').textContent = '';
   document.getElementById('fx-rate').textContent = 'USD/TWD ' + d.usdtwd_rate;
 }
 
 function renderOverview(nw, us, tw, opt) {
   const urgentOpts = opt.positions ? opt.positions.filter(p => p.urgency === 'red').length : 0;
+  const rate = nw.usdtwd_rate;
   const grid = document.getElementById('overview-grid');
   grid.innerHTML = `
+    <div class="summary-item" style="grid-column:1/-1; background:#1a2744;">
+      <div class="summary-label" style="font-size:13px;">總資產 (USD)</div>
+      <div class="summary-value" style="font-size:22px;">USD $${fmt(nw.assets.total_assets_usd)}</div>
+      <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:13px; color:#94a3b8;">
+        <span>美股 USD $${fmt(nw.assets.us_stocks_usd)}</span>
+        <span>台股 NT$ ${fmtInt(nw.assets.tw_stocks_twd)}</span>
+        <span>債券 USD $${fmt(nw.assets.bonds_cost_usd)}</span>
+      </div>
+    </div>
     <div class="summary-item">
-      <div class="summary-label">美股市值</div>
-      <div class="summary-value">$${fmt(nw.assets.us_stocks_usd)}</div>
+      <div class="summary-label">美股</div>
+      <div class="summary-value">USD $${fmt(nw.assets.us_stocks_usd)}</div>
       <div class="summary-label ${plClass(us.summary.total_pl)}">${plSign(us.summary.total_pl)}$${fmt(us.summary.total_pl)} (${us.summary.total_pl_pct}%)</div>
     </div>
     <div class="summary-item">
-      <div class="summary-label">台股市值</div>
-      <div class="summary-value">NT$${fmtInt(nw.assets.tw_stocks_twd)}</div>
-      <div class="summary-label ${plClass(tw.summary.total_pl_twd)}">${plSign(tw.summary.total_pl_twd)}NT$${fmtInt(tw.summary.total_pl_twd)} (${tw.summary.total_pl_pct}%)</div>
+      <div class="summary-label">台股</div>
+      <div class="summary-value">NT$ ${fmtInt(nw.assets.tw_stocks_twd)}</div>
+      <div class="summary-label" style="color:#64748b">≈ USD $${fmt(nw.assets.tw_stocks_usd)}</div>
+      <div class="summary-label ${plClass(tw.summary.total_pl_twd)}">${plSign(tw.summary.total_pl_twd)}NT$ ${fmtInt(tw.summary.total_pl_twd)} (${tw.summary.total_pl_pct}%)</div>
     </div>
     <div class="summary-item">
-      <div class="summary-label">債券</div>
-      <div class="summary-value">$${fmt(nw.assets.bonds_cost_usd)}</div>
-      <div class="summary-label">月配息 $${fmt(nw.income.bonds_monthly_net_usd)}</div>
+      <div class="summary-label">債券 (USD)</div>
+      <div class="summary-value">USD $${fmt(nw.assets.bonds_cost_usd)}</div>
+      <div class="summary-label pl-pos">月配息 USD $${fmt(nw.income.bonds_monthly_net_usd)}</div>
     </div>
     <div class="summary-item">
-      <div class="summary-label">貸款</div>
-      <div class="summary-value">NT$${fmtInt(nw.liabilities.total_loans_twd)}</div>
-      <div class="summary-label">月付 NT$${fmtInt(nw.liabilities.monthly_payments_twd)}</div>
+      <div class="summary-label">貸款 (TWD)</div>
+      <div class="summary-value">NT$ ${fmtInt(nw.liabilities.total_loans_twd)}</div>
+      <div class="summary-label" style="color:#64748b">≈ USD $${fmt(nw.liabilities.total_loans_usd)}</div>
+      <div class="summary-label pl-neg">月付 NT$ ${fmtInt(nw.liabilities.monthly_payments_twd)}</div>
     </div>
     <div class="summary-item">
       <div class="summary-label">選擇權</div>
       <div class="summary-value">${opt.positions ? opt.positions.length : 0} 筆</div>
-      <div class="summary-label ${urgentOpts > 0 ? 'pl-neg' : ''}">${urgentOpts > 0 ? '⚠️ ' + urgentOpts + ' 筆需處理' : '✅ 無緊急'}</div>
+      <div class="summary-label ${urgentOpts > 0 ? 'pl-neg' : ''}">${urgentOpts > 0 ? urgentOpts + ' 筆需處理' : '無緊急'}</div>
     </div>
     <div class="summary-item">
-      <div class="summary-label">總資產</div>
-      <div class="summary-value">$${fmt(nw.assets.total_assets_usd)}</div>
-      <div class="summary-label">淨值 $${fmt(nw.net_worth_usd)}</div>
+      <div class="summary-label">月現金流 (USD)</div>
+      <div class="summary-value ${plClass(nw.income.bonds_monthly_net_usd - nw.liabilities.monthly_payments_twd / rate)}">${plSign(nw.income.bonds_monthly_net_usd - nw.liabilities.monthly_payments_twd / rate)}$${fmt(nw.income.bonds_monthly_net_usd - nw.liabilities.monthly_payments_twd / rate)}</div>
+      <div class="summary-label" style="color:#64748b">配息 - 貸款月付</div>
     </div>
   `;
 }
@@ -253,7 +345,30 @@ function renderIncome(nw) {
   `;
 }
 
-loadAll();
+async function doLogin() {
+  const pw = document.getElementById('pw-input').value.trim().toLowerCase();
+  try {
+    const r = await fetch('/api/auth', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pw})});
+    if (r.ok) {
+      const data = await r.json();
+      sessionStorage.setItem('dashboard_key', data.api_key || '');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadAll(false);
+    } else {
+      document.getElementById('pw-error').textContent = '密碼錯誤';
+    }
+  } catch(e) {
+    document.getElementById('pw-error').textContent = '連線失敗';
+  }
+}
+
+if (sessionStorage.getItem('dashboard_key')) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadAll();
+}
 </script>
+</div>
 </body>
 </html>

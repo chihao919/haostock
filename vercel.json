@@ -16,6 +16,7 @@
     { "source": "/mcp/:path*", "destination": "/api" },
     { "source": "/mcp", "destination": "/api" },
     { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/fivelines", "destination": "/api" },
     { "source": "/", "destination": "/api" }
   ]
 }

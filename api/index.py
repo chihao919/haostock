@@ -1,13 +1,44 @@
 """Single FastAPI app for all Vercel serverless endpoints."""
 
+import os
 from pathlib import Path
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel, field_validator
 from datetime import datetime
 
 app = FastAPI(title="Portfolio Quotes API", version="2.0.0")
+
+_API_KEY = os.environ.get("FINANCIAL_API_KEY", "")
+
+# Paths that don't require API key
+_PUBLIC_PATHS = {"/api/health", "/api/auth", "/api/fivelines/auth", "/", "/fivelines"}
+
+
+class APIKeyMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+        # Skip auth for public paths, non-API paths, MCP endpoint, and OPTIONS
+        if (not _API_KEY
+                or request.method == "OPTIONS"
+                or path in _PUBLIC_PATHS
+                or path.startswith("/mcp")
+                or path.startswith("/.well-known")
+                or path.startswith("/authorize")
+                or path.startswith("/token")
+                or path.startswith("/api/fivelines/")
+                or not path.startswith("/api")):
+            return await call_next(request)
+        # Check x-api-key header
+        key = request.headers.get("x-api-key")
+        if key != _API_KEY:
+            return JSONResponse(status_code=401, content={"detail": "Invalid or missing API key"})
+        return await call_next(request)
+
+
+app.add_middleware(APIKeyMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,6 +57,9 @@ from lib.calculator import (
     suggest_action, calc_option_pl, calc_bond_income, calc_net_worth,
     calc_trade_summary,
 )
+from lib.tw_financial import analyze_stock as analyze_tw_stock
+from lib.us_financial import analyze_stock as analyze_us_stock
+from lib.five_lines import analyze as five_lines_analyze
 
 
 # --- Validation models ---
@@ -74,10 +108,23 @@ class TradeCreate(BaseModel):
 
 # --- Dashboard ---
 
+_DASHBOARD_PASSWORD = os.environ.get("FIVELINES_PASSWORD", "ccj")
+
+
 @app.get("/", response_class=HTMLResponse)
 def dashboard():
     html_path = Path(__file__).parent / "templates" / "index.html"
     return html_path.read_text(encoding="utf-8")
+
+
+@app.post("/api/auth")
+async def dashboard_auth(request: Request):
+    """Authenticate and return API key for dashboard."""
+    body = await request.json()
+    pw = body.get("password", "").strip().lower()
+    if pw == _DASHBOARD_PASSWORD:
+        return {"ok": True, "api_key": _API_KEY}
+    raise HTTPException(status_code=401, detail="密碼錯誤")
 
 
 # --- Endpoints ---
@@ -345,6 +392,66 @@ async def add_trade(trade: TradeCreate):
     return {"id": page_id, "status": "created", "timestamp": datetime.now().isoformat()}
 
 
+@app.get("/api/strategy")
+async def get_strategy():
+    """Return investment strategy markdown."""
+    strategy_path = Path(__file__).parent / "docs" / "INVESTMENT_STRATEGY.md"
+    if not strategy_path.exists():
+        raise HTTPException(status_code=404, detail="Strategy file not found")
+    return {"content": strategy_path.read_text(encoding="utf-8")}
+
+
+@app.get("/api/financial/analyze/{ticker}")
+async def financial_analyze(ticker: str):
+    ticker = ticker.strip()
+    try:
+        if ticker.isdigit():
+            result = await analyze_tw_stock(ticker)
+        else:
+            result = await analyze_us_stock(ticker.upper())
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Analysis failed: {e}")
+    result["timestamp"] = datetime.now().isoformat()
+    return result
+
+
+# --- Five Lines (樂活五線譜) ---
+
+
+_FIVELINES_PASSWORD = os.environ.get("FIVELINES_PASSWORD", "ccj")
+
+
+@app.get("/fivelines", response_class=HTMLResponse)
+def five_lines_page():
+    html_path = Path(__file__).parent / "templates" / "fivelines.html"
+    return html_path.read_text(encoding="utf-8")
+
+
+@app.post("/api/fivelines/auth")
+async def five_lines_auth(request: Request):
+    body = await request.json()
+    pw = body.get("password", "").strip().lower()
+    if pw == _FIVELINES_PASSWORD:
+        return {"ok": True, "level": "full"}
+    if pw == "2330":
+        return {"ok": True, "level": "basic"}
+    raise HTTPException(status_code=401, detail="密碼錯誤")
+
+
+@app.get("/api/fivelines/{ticker}")
+def five_lines(ticker: str, years: float = 3.5, include_history: bool = False):
+    # Auto-append .TW for numeric TW stock tickers
+    ticker = ticker.strip()
+    if ticker.isdigit():
+        ticker = f"{ticker}.TW"
+    try:
+        result = five_lines_analyze(ticker, years=years, include_history=include_history)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Analysis failed for {ticker}: {e}")
+    result["timestamp"] = datetime.now().isoformat()
+    return result
+
+
 # --- Remote MCP Endpoint (Streamable HTTP, spec 2025-03-26) ---
 
 import json
@@ -458,13 +565,16 @@ _MCP_TOOLS = [
     {"name": "get_fx_rate", "description": "Get USD/TWD exchange rate.", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "get_trades", "description": "Query trade history with optional filters.", "inputSchema": {"type": "object", "properties": {"ticker": {"type": "string"}, "result": {"type": "string"}, "asset_type": {"type": "string"}, "limit": {"type": "integer"}}}},
     {"name": "add_trade", "description": "Add trade record. action: Buy/Sell/Open/Close/Roll.", "inputSchema": {"type": "object", "properties": {"date": {"type": "string"}, "ticker": {"type": "string"}, "action": {"type": "string"}, "asset_type": {"type": "string"}, "qty": {"type": "number"}, "price": {"type": "number"}, "total_amount": {"type": "number"}, "reason": {"type": "string"}, "account": {"type": "string"}, "pl": {"type": "number"}, "result": {"type": "string"}, "lesson": {"type": "string"}, "tags": {"type": "array", "items": {"type": "string"}}}, "required": ["date", "ticker", "action", "asset_type", "qty", "price", "total_amount", "reason", "account"]}},
+    {"name": "analyze_stock", "description": "Financial analysis (Huang Kuo-Hua method for TW, fundamental for US). Pass numeric ticker for TW (e.g. 2330), alpha for US (e.g. NVDA).", "inputSchema": {"type": "object", "properties": {"ticker": {"type": "string", "description": "Stock ticker: numeric for TW (2330), alpha for US (NVDA)"}}, "required": ["ticker"]}},
+    {"name": "get_five_lines", "description": "Happy Five Lines (樂活五線譜) analysis — linear regression ± σ bands with buy/sell signals. Works for TW (0050.TW) and US (VOO) stocks.", "inputSchema": {"type": "object", "properties": {"ticker": {"type": "string", "description": "Stock ticker (e.g. 0050.TW, VOO, 2330.TW)"}, "years": {"type": "number", "description": "Historical period in years (default 3.5)"}}, "required": ["ticker"]}},
 ]
 
 _TOOL_ROUTES = {"get_us_stocks": "/api/stocks/us", "get_tw_stocks": "/api/stocks/tw", "get_options": "/api/options", "get_networth": "/api/networth", "get_fx_rate": "/api/fx"}
 
 
 async def _mcp_call_tool(name: str, args: dict) -> str:
-    async with _httpx.AsyncClient(timeout=15) as c:
+    _headers = {"x-api-key": _API_KEY} if _API_KEY else {}
+    async with _httpx.AsyncClient(timeout=15, headers=_headers) as c:
         if name in _TOOL_ROUTES:
             r = await c.get(f"{_MCP_API}{_TOOL_ROUTES[name]}")
             r.raise_for_status()
@@ -480,6 +590,15 @@ async def _mcp_call_tool(name: str, args: dict) -> str:
             return json.dumps(r.json(), indent=2)
         if name == "add_trade":
             r = await c.post(f"{_MCP_API}/api/trades", json=args)
+            r.raise_for_status()
+            return json.dumps(r.json(), indent=2)
+        if name == "analyze_stock":
+            r = await c.get(f"{_MCP_API}/api/financial/analyze/{args.get('ticker', '')}", timeout=30)
+            r.raise_for_status()
+            return json.dumps(r.json(), indent=2)
+        if name == "get_five_lines":
+            p = {"years": args.get("years", 3.5)}
+            r = await c.get(f"{_MCP_API}/api/fivelines/{args.get('ticker', '')}", params=p, timeout=15)
             r.raise_for_status()
             return json.dumps(r.json(), indent=2)
     return json.dumps({"error": f"Unknown tool: {name}"})
