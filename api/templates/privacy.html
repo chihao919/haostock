@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Portfolio Dashboard</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; padding: 24px 16px; line-height: 1.7; }
+.container { max-width: 720px; margin: 0 auto; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; color: #64748b; text-decoration: none; font-size: 14px; margin-bottom: 32px; transition: color 0.2s; }
+.back-link:hover { color: #38bdf8; }
+.back-link::before { content: '←'; font-size: 16px; }
+h1 { font-size: 26px; font-weight: 700; color: #f8fafc; margin-bottom: 6px; }
+.subtitle { color: #64748b; font-size: 14px; margin-bottom: 40px; }
+.section { margin-bottom: 36px; }
+h2 { font-size: 16px; font-weight: 600; color: #38bdf8; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #1e293b; }
+p { color: #cbd5e1; font-size: 14px; margin-bottom: 10px; }
+ul { padding-left: 20px; color: #cbd5e1; font-size: 14px; }
+ul li { margin-bottom: 8px; }
+.highlight { color: #86efac; font-weight: 600; }
+.divider { border: none; border-top: 1px solid #1e293b; margin: 40px 0; }
+.lang-tag { display: inline-block; background: #1e293b; color: #64748b; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-bottom: 24px; }
+.contact-block { background: #1e293b; border-radius: 12px; padding: 16px 20px; margin-top: 8px; font-size: 14px; color: #94a3b8; }
+.contact-block a { color: #38bdf8; text-decoration: none; }
+.contact-block a:hover { text-decoration: underline; }
+footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #1e293b; color: #475569; font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="/portfolio">Back to Portfolio</a>
+
+  <h1>Privacy Policy</h1>
+  <p class="subtitle">Last updated: March 2026</p>
+
+  <!-- English Section -->
+  <span class="lang-tag">English</span>
+
+  <div class="section">
+    <h2>Overview</h2>
+    <p>Portfolio Dashboard ("the App") is a personal investment portfolio tracker. We are committed to protecting your privacy. This page explains what data we collect, how we use it, and your rights.</p>
+  </div>
+
+  <div class="section">
+    <h2>Authentication</h2>
+    <p>We use <span class="highlight">Google Sign-In</span> for authentication. When you sign in:</p>
+    <ul>
+      <li>Google verifies your identity and returns a secure token to the App.</li>
+      <li>We read only your basic profile (name, email, profile picture) to display in the UI.</li>
+      <li>We do <strong>not</strong> store your Google credentials or password.</li>
+      <li>We request access to Google Drive only for the <code>appDataFolder</code> scope (a hidden folder exclusive to this App).</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Data Storage</h2>
+    <p>Your portfolio data (stock positions, watchlists, trade records) is stored <span class="highlight">in your own Google Drive</span> — specifically in the hidden <code>appDataFolder</code>, which is invisible to you in the regular Drive interface and inaccessible to other apps.</p>
+    <ul>
+      <li><span class="highlight">We do NOT store any personal data on our servers.</span></li>
+      <li>The Vercel serverless functions process requests in memory only; nothing is persisted server-side.</li>
+      <li>Deleting your data is as simple as revoking the App's access in your Google Account settings.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Stock Quotes</h2>
+    <p>Real-time and delayed stock quotes are fetched from <strong>Yahoo Finance</strong> on demand. Your portfolio positions are never sent to Yahoo Finance — only ticker symbols are used in the query.</p>
+  </div>
+
+  <div class="section">
+    <h2>Cookies &amp; Tracking</h2>
+    <ul>
+      <li>We do <strong>not</strong> use advertising cookies or tracking pixels.</li>
+      <li>Google Sign-In may set cookies managed by Google. Refer to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style="color:#38bdf8;">Google's Privacy Policy</a> for details.</li>
+      <li>We do not use any third-party analytics services.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Third-Party Sharing</h2>
+    <p>We <span class="highlight">do not sell, rent, or share</span> your personal data with any third parties. The only external services involved are Google (authentication &amp; Drive) and Yahoo Finance (quotes).</p>
+  </div>
+
+  <div class="section">
+    <h2>Data Retention &amp; Deletion</h2>
+    <p>Since all data lives in your Google Drive, you have full control:</p>
+    <ul>
+      <li>To delete your portfolio data: go to <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener" style="color:#38bdf8;">Google Account Permissions</a>, find Portfolio Dashboard, and remove access. This deletes the appDataFolder and all its contents.</li>
+      <li>To stop using the App: simply stop signing in. No action needed on our end.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Contact</h2>
+    <div class="contact-block">
+      If you have questions about this Privacy Policy, please contact:<br>
+      <strong>chihaohuang@gmail.com</strong>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Chinese Section -->
+  <span class="lang-tag">中文說明</span>
+
+  <div class="section">
+    <h2>隱私政策摘要</h2>
+    <p>以下為中文說明，供參考。如有歧義，以英文版本為準。</p>
+  </div>
+
+  <div class="section">
+    <h2>驗證方式</h2>
+    <p>本應用使用 <span class="highlight">Google 帳號登入</span>，我們只讀取您的基本個人資料（姓名、Email、頭像）用於介面顯示。我們不保存您的 Google 帳號密碼或憑證。</p>
+  </div>
+
+  <div class="section">
+    <h2>資料存放位置</h2>
+    <p>您的投資組合資料（股票持倉、自選清單、交易記錄）<span class="highlight">存放在您自己的 Google Drive</span>，使用隱藏的 appDataFolder（其他應用程式及您本人均無法在 Drive 介面中看到此資料夾）。</p>
+    <ul>
+      <li><span class="highlight">我們的伺服器不儲存任何個人資料。</span></li>
+      <li>Vercel 伺服器函式僅在記憶體中處理請求，不進行任何持久化儲存。</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>股票報價</h2>
+    <p>即時或延遲的股票報價來自 <strong>Yahoo Finance</strong>。我們只向 Yahoo Finance 發送股票代碼進行查詢，您的持倉數量與成本等個人資料不會傳送至 Yahoo Finance。</p>
+  </div>
+
+  <div class="section">
+    <h2>Cookie 與追蹤</h2>
+    <ul>
+      <li>我們不使用廣告 Cookie 或追蹤像素。</li>
+      <li>Google 登入可能設置由 Google 管理的 Cookie，詳情請參閱 Google 的隱私政策。</li>
+      <li>我們不使用任何第三方分析服務。</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>資料共享</h2>
+    <p>我們<span class="highlight">不出售、出租或分享</span>您的個人資料給任何第三方。涉及的外部服務僅有 Google（登入與 Drive）以及 Yahoo Finance（報價）。</p>
+  </div>
+
+  <div class="section">
+    <h2>刪除資料</h2>
+    <p>由於所有資料都存放在您的 Google Drive，您擁有完全控制權：前往 <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener" style="color:#38bdf8;">Google 帳戶權限頁面</a>，找到 Portfolio Dashboard 並移除存取權限，即可刪除 appDataFolder 及所有資料。</p>
+  </div>
+
+  <div class="section">
+    <h2>聯絡方式</h2>
+    <div class="contact-block">
+      如有任何隱私相關疑問，請聯絡：<br>
+      <a href="mailto:chihaohuang@gmail.com">chihaohuang@gmail.com</a>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 Portfolio Dashboard &nbsp;·&nbsp;
+    <a href="/privacy" style="color:#475569; text-decoration:none;">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="/terms" style="color:#475569; text-decoration:none;">Terms of Service</a>
+  </footer>
+
+</div>
+</body>
+</html>

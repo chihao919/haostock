@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel, field_validator
 from datetime import datetime
@@ -14,7 +15,7 @@ app = FastAPI(title="Portfolio Quotes API", version="2.0.0")
 _API_KEY = os.environ.get("FINANCIAL_API_KEY", "")
 
 # Paths that don't require API key
-_PUBLIC_PATHS = {"/api/health", "/api/auth", "/api/fivelines/auth", "/", "/fivelines"}
+_PUBLIC_PATHS = {"/api/health", "/api/auth", "/api/fivelines/auth", "/api/config", "/", "/fivelines", "/portfolio", "/privacy", "/terms"}
 
 
 class APIKeyMiddleware(BaseHTTPMiddleware):
@@ -29,6 +30,14 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
                 or path.startswith("/authorize")
                 or path.startswith("/token")
                 or path.startswith("/api/fivelines/")
+                or path.startswith("/api/quote/")
+                or path == "/api/fx"
+                or path == "/api/bonds"
+                or path == "/api/loans"
+                or path == "/api/stocks/us"
+                or path == "/api/stocks/tw"
+                or path == "/api/options"
+                or path.startswith("/static/")
                 or not path.startswith("/api")):
             return await call_next(request)
         # Check x-api-key header
@@ -45,6 +54,11 @@ app.add_middleware(
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Mount static files
+_static_dir = Path(__file__).parent / "static"
+if _static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
 
 # Import lib modules
 from lib.notion import (
@@ -115,6 +129,33 @@ _DASHBOARD_PASSWORD = os.environ.get("FIVELINES_PASSWORD", "ccj")
 def dashboard():
     html_path = Path(__file__).parent / "templates" / "index.html"
     return html_path.read_text(encoding="utf-8")
+
+
+_GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+
+
+@app.get("/portfolio", response_class=HTMLResponse)
+def portfolio_page():
+    html_path = Path(__file__).parent / "templates" / "portfolio.html"
+    return html_path.read_text(encoding="utf-8")
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+def privacy_page():
+    html_path = Path(__file__).parent / "templates" / "privacy.html"
+    return html_path.read_text(encoding="utf-8")
+
+
+@app.get("/terms", response_class=HTMLResponse)
+def terms_page():
+    html_path = Path(__file__).parent / "templates" / "terms.html"
+    return html_path.read_text(encoding="utf-8")
+
+
+@app.get("/api/config")
+def public_config():
+    """Return public config (Google Client ID) — no auth required."""
+    return {"google_client_id": _GOOGLE_CLIENT_ID}
 
 
 @app.post("/api/auth")
@@ -367,6 +408,24 @@ async def net_worth():
     }
 
 
+@app.get("/api/bonds")
+async def list_bonds():
+    try:
+        bonds = await get_bonds()
+    except NotionAPIError:
+        raise HTTPException(status_code=502, detail="Notion API unavailable")
+    return {"bonds": bonds, "timestamp": datetime.now().isoformat()}
+
+
+@app.get("/api/loans")
+async def list_loans():
+    try:
+        loans = await get_loans()
+    except NotionAPIError:
+        raise HTTPException(status_code=502, detail="Notion API unavailable")
+    return {"loans": loans, "timestamp": datetime.now().isoformat()}
+
+
 @app.get("/api/trades")
 async def list_trades(
     ticker: str | None = None,
@@ -467,7 +526,7 @@ _MCP_API = "https://stock.cwithb.com"
 
 # --- OAuth 2.1 for MCP (minimal implementation for personal use) ---
 _OAUTH_CLIENT_ID = "portfolio-mcp-client"
-_OAUTH_CLIENT_SECRET = "pf-mcp-2026-s3cret-key"
+_OAUTH_CLIENT_SECRET = os.environ.get("OAUTH_CLIENT_SECRET", "")
 _OAUTH_ISSUER = "https://stock.cwithb.com"
 
 # In-memory stores (reset on cold start, fine for serverless personal use)

@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Dashboard</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1e293b; padding: 16px; font-size: 18px; }
+.header { text-align: center; padding: 16px 0; }
+.header h1 { font-size: 22px; color: #6366f1; }
+.header .networth { font-size: 40px; font-weight: 700; color: #6366f1; margin: 8px 0; }
+.header .sub { font-size: 15px; color: #475569; }
+.tabs { display: flex; gap: 8px; margin: 16px 0; overflow-x: auto; }
+.tab { padding: 10px 18px; border-radius: 8px; background: #fff; color: #475569; border: 1px solid #e2e8f0; font-size: 17px; cursor: pointer; white-space: nowrap; }
+.tab.active { background: #6366f1; color: #fff; border-color: #6366f1; }
+.section { display: none; }
+.section.active { display: block; }
+.card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.card-title { font-size: 16px; color: #475569; margin-bottom: 12px; font-weight: 600; }
+.row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
+.row:last-child { border-bottom: none; }
+.ticker { font-weight: 600; font-size: 18px; color: #1e293b; }
+.ticker-sub { font-size: 14px; color: #94a3b8; }
+.price { text-align: right; }
+.price-main { font-size: 18px; font-weight: 600; }
+.pl-pos { color: #16a34a; }
+.pl-neg { color: #dc2626; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.badge-red { background: #fef2f2; color: #dc2626; }
+.badge-yellow { background: #fffbeb; color: #d97706; }
+.badge-green { background: #f0fdf4; color: #16a34a; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.summary-item { background: #fff; border-radius: 12px; padding: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.summary-label { font-size: 15px; color: #475569; }
+.summary-value { font-size: 22px; font-weight: 700; margin-top: 4px; color: #6366f1; }
+.loading { text-align: center; padding: 40px; color: #94a3b8; }
+.option-row { padding: 12px 0; border-bottom: 1px solid #e2e8f0; }
+.option-row:last-child { border-bottom: none; }
+.option-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.option-details { display: flex; gap: 12px; font-size: 14px; color: #475569; flex-wrap: wrap; }
+.action-tag { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #eef2ff; color: #6366f1; }
+.action-urgent { background: #fef2f2; color: #dc2626; }
+.action-close { background: #f0fdf4; color: #16a34a; }
+.account-toggle { cursor: pointer; }
+.account-toggle::after { content: ' ▼'; font-size: 10px; }
+.btn { padding: 8px 16px; border-radius: 10px; border: none; font-size: 13px; cursor: pointer; }
+.btn-primary { background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; }
+.btn-primary:hover { background: linear-gradient(135deg, #dc2626, #ea580c); }
+.btn-danger { background: #dc2626; color: #fff; }
+.btn-secondary { background: #1e293b; color: #fff; }
+.btn-secondary:hover { background: #334155; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 100; justify-content: center; align-items: center; }
+.modal-overlay.active { display: flex; }
+.modal { background: #fff; border-radius: 16px; padding: 24px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
+.modal h3 { margin-bottom: 16px; font-size: 16px; color: #1e293b; }
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 12px; color: #475569; margin-bottom: 4px; font-weight: 600; }
+.form-group input, .form-group select { width: 100%; padding: 8px 12px; background: #fff; border: 1px solid #e2e8f0; color: #1e293b; border-radius: 10px; font-size: 14px; }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+.form-actions { display: flex; gap: 8px; margin-top: 16px; }
+.form-actions .btn { flex: 1; }
+.user-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; margin-bottom: 8px; }
+.user-info { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; }
+.user-info img { width: 28px; height: 28px; border-radius: 50%; }
+.empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; }
+.empty-state p { margin-bottom: 16px; }
+.add-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 12px; background: #fff; border: 1px dashed #e2e8f0; border-radius: 12px; color: #94a3b8; font-size: 14px; cursor: pointer; margin-bottom: 12px; }
+.add-btn:hover { border-color: #6366f1; color: #6366f1; }
+.delete-btn { color: #94a3b8; background: none; border: none; font-size: 16px; cursor: pointer; padding: 4px 8px; }
+.delete-btn:hover { color: #dc2626; }
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.pos-tbl { width: 100%; border-collapse: collapse; font-size: 16px; white-space: nowrap; }
+.pos-tbl th { text-align: right; font-weight: 600; color: #94a3b8; font-size: 14px; padding: 8px 10px; border-bottom: 2px solid #e2e8f0; }
+.pos-tbl th:first-child { text-align: left; }
+.pos-tbl td { text-align: right; padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 16px; }
+.pos-tbl td:first-child { text-align: left; font-weight: 600; color: #1e293b; }
+.pos-tbl tr:last-child td { border-bottom: none; }
+.pos-tbl .sym { color: #6366f1; font-weight: 600; font-size: 17px; }
+.acct-summary { display: flex; gap: 16px; font-size: 15px; color: #475569; padding: 6px 0 12px; flex-wrap: wrap; }
+.acct-summary span { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="login-screen" style="display:flex; justify-content:center; align-items:center; height:100vh;">
+  <div style="text-align:center; max-width: 360px;">
+    <h1 style="font-size:24px; margin-bottom:12px; color:#6366f1;">Portfolio Dashboard</h1>
+    <p style="color:#475569; margin-bottom:24px; font-size:14px; line-height:1.6;">
+      用 Google 帳號登入，追蹤你的投資組合。
+    </p>
+    <div style="text-align:left; background:#fff; border-radius:16px; padding:16px; margin-bottom:24px; font-size:13px; color:#475569; line-height:1.8; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+      <div style="font-weight:600; color:#1e293b; margin-bottom:8px;">資料管理方式</div>
+      <div>&#x2022; 持倉數據存在<span style="color:#6366f1; font-weight:600;">你自己的 Google Sheets</span>，伺服器不保存任何個人資料</div>
+      <div>&#x2022; 你可以直接在 Google Sheets 裡查看和編輯持倉資料</div>
+      <div>&#x2022; 即時報價由 Yahoo Finance 提供，每次開啟時自動更新</div>
+      <div>&#x2022; 換裝置或瀏覽器，只要登入同一個 Google 帳號，資料自動同步</div>
+      <div>&#x2022; 登出後本機不留任何數據</div>
+    </div>
+    <div id="g-signin-btn"></div>
+    <div id="login-error" style="color:#dc2626; margin-top:12px; font-size:13px;"></div>
+    <div style="margin-top:32px; border-top:1px solid #e2e8f0; padding-top:20px; display:flex; gap:12px; justify-content:center;">
+      <a href="/" style="background:#fff; border:1px solid #e2e8f0; color:#475569; padding:10px 24px; border-radius:10px; font-size:14px; text-decoration:none; box-shadow:0 1px 3px rgba(0,0,0,0.08);">Dashboard</a>
+      <a href="/fivelines" style="background:#fff; border:1px solid #e2e8f0; color:#475569; padding:10px 24px; border-radius:10px; font-size:14px; text-decoration:none; box-shadow:0 1px 3px rgba(0,0,0,0.08);">五線譜</a>
+    </div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="app" style="display:none;">
+<div class="user-bar">
+  <div class="user-info">
+    <img id="user-avatar" src="" alt="">
+    <span id="user-name"></span>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a id="folder-link" href="#" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration:none;display:none">Drive 資料夾</a>
+    <a id="sheets-link" href="#" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration:none;display:none">Google Sheets</a>
+    <button class="btn btn-secondary btn-sm" onclick="signOut()">登出</button>
+  </div>
+</div>
+
+<div class="header">
+  <h1>Portfolio Dashboard</h1>
+  <div class="networth" id="networth-display">Loading...</div>
+  <div class="sub" id="networth-sub"></div>
+  <div class="sub" id="fx-display"></div>
+  <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="refreshData()">重新整理</button>
+  <button id="import-btn" class="btn btn-primary btn-sm" style="margin-top:8px;display:none" onclick="importFromNotion()">從 Notion 匯入</button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('overview',this)">總覽</button>
+  <button class="tab" onclick="showTab('us',this)">美股</button>
+  <button class="tab" onclick="showTab('tw',this)">台股</button>
+  <button class="tab" onclick="showTab('options',this)">選擇權</button>
+  <button class="tab" onclick="showTab('income',this)">收入支出</button>
+</div>
+
+<div id="overview" class="section active">
+  <div class="summary-grid" id="overview-grid"></div>
+  <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+    <div class="card" style="flex:1;min-width:160px;text-align:center;">
+      <div class="card-title">資產配置</div>
+      <div style="max-width:200px;margin:0 auto;"><canvas id="chart-assets"></canvas></div>
+    </div>
+    <div class="card" style="flex:1;min-width:160px;">
+      <div class="card-title">月現金流</div>
+      <div id="cashflow-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="us" class="section">
+  <button class="add-btn" onclick="openModal('us-stock')">+ 新增美股持倉</button>
+  <div id="us-content"><div class="empty-state"><p>尚無美股持倉</p></div></div>
+</div>
+
+<div id="tw" class="section">
+  <button class="add-btn" onclick="openModal('tw-stock')">+ 新增台股持倉</button>
+  <div id="tw-content"><div class="empty-state"><p>尚無台股持倉</p></div></div>
+</div>
+
+<div id="options" class="section">
+  <button class="add-btn" onclick="openModal('option')">+ 新增選擇權</button>
+  <div id="options-content"><div class="empty-state"><p>尚無選擇權部位</p></div></div>
+</div>
+
+<div id="income" class="section">
+  <button class="add-btn" onclick="openModal('income-item')">+ 新增收入/支出</button>
+  <button class="add-btn" onclick="openModal('bond')">+ 新增債券</button>
+  <button class="add-btn" onclick="openModal('loan')">+ 新增貸款</button>
+  <div id="income-content"></div>
+</div>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script src="/static/calculator.js"></script>
+<script>
+const API = '';
+const fmt = (n, d=0) => n != null ? Number(n).toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d}) : '-';
+const fmtInt = n => n != null ? Number(n).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}) : '-';
+const plClass = n => n >= 0 ? 'pl-pos' : 'pl-neg';
+const plSign = n => n >= 0 ? '+' : '';
+
+// --- State ---
+let gUser = null;
+let gToken = null;
+let portfolio = null;    // parsed portfolio data (same structure as before)
+let priceCache = {};
+let fxRate = null;
+let spreadsheetId = null;
+
+const SHEETS_SCOPE = 'openid email profile https://www.googleapis.com/auth/drive.file';
+const FOLDER_NAME = 'Portfolio';
+const SHEET_TITLE = 'Portfolio Dashboard';
+
+// Sheet headers
+const HEADERS = {
+  US_Stocks:  ['account', 'ticker', 'shares', 'avg_cost'],
+  TW_Stocks:  ['ticker', 'name', 'account', 'shares', 'avg_cost_twd'],
+  Options:    ['account', 'ticker', 'expiry', 'strike', 'type', 'qty', 'cost'],
+  Bonds:      ['name', 'face_value', 'coupon_rate', 'maturity', 'cost'],
+  Loans:      ['name', 'rate', 'balance_twd', 'monthly_payment_twd'],
+  Income:     ['name', 'amount_usd', 'amount_twd', 'frequency'],
+  Settings:   ['key', 'value'],
+};
+
+// --- Google Sign In ---
+let googleClientId = null;
+
+async function initGoogleSignIn() {
+  try {
+    const r = await fetch('/api/config');
+    const cfg = await r.json();
+    googleClientId = cfg.google_client_id;
+    if (!googleClientId) {
+      document.getElementById('login-error').textContent = 'Google Sign-In not configured';
+      return;
+    }
+  } catch(e) {
+    document.getElementById('login-error').textContent = 'Failed to load config';
+    return;
+  }
+
+  // Single OAuth2 flow: one popup for identity + Sheets access
+  window._tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: googleClientId,
+    scope: SHEETS_SCOPE,
+    callback: async (tokenResponse) => {
+      if (tokenResponse.error) {
+        document.getElementById('login-error').textContent = 'Google 授權失敗';
+        return;
+      }
+      gToken = tokenResponse.access_token;
+      // Fetch user info from Google
+      try {
+        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${gToken}` }
+        });
+        const info = await res.json();
+        gUser = { name: info.name, email: info.email, picture: info.picture };
+      } catch(e) {
+        gUser = { name: 'User', email: '', picture: '' };
+      }
+      enterApp();
+    },
+  });
+
+  // Render a custom Sign In button that triggers the single OAuth flow
+  const btn = document.getElementById('g-signin-btn');
+  btn.innerHTML = `<button style="display:flex;align-items:center;gap:10px;padding:12px 24px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;font-size:15px;font-weight:500;color:#1e293b;box-shadow:0 1px 3px rgba(0,0,0,0.08);font-family:inherit;">
+    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+    Sign in with Google
+  </button>`;
+  btn.querySelector('button').addEventListener('click', () => {
+    window._tokenClient.requestAccessToken();
+  });
+}
+
+function enterApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-avatar').src = gUser.picture || '';
+  document.getElementById('user-name').textContent = gUser.name || gUser.email;
+  loadPortfolio();
+}
+
+function signOut() {
+  // Keep localStorage cache (so re-login finds the same sheet)
+  gUser = null;
+  gToken = null;
+  portfolio = null;
+  spreadsheetId = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('sheets-link').style.display = 'none';
+  google.accounts.oauth2.revoke(gToken, () => {});
+}
+
+// --- Google API helpers ---
+async function gapi(url, options = {}) {
+  const r = await fetch(url, {
+    ...options,
+    headers: { 'Authorization': `Bearer ${gToken}`, 'Content-Type': 'application/json', ...(options.headers || {}) },
+  });
+  if (r.status === 401) { signOut(); throw new Error('Token expired'); }
+  return r;
+}
+
+// --- Google Drive + Sheets ---
+let folderId = null;
+
+async function findOrCreateFolder() {
+  const q = encodeURIComponent(`name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  const r = await gapi(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&orderBy=modifiedTime desc`);
+  const data = await r.json();
+  if (data.files && data.files.length > 0) return data.files[0].id;
+  const cr = await gapi('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    body: JSON.stringify({ name: FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' }),
+  });
+  return (await cr.json()).id;
+}
+
+async function findSpreadsheet() {
+  const q = encodeURIComponent(`name='${SHEET_TITLE}' and '${folderId}' in parents and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`);
+  const r = await gapi(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&orderBy=modifiedTime desc`);
+  const data = await r.json();
+  return data.files && data.files.length > 0 ? data.files[0].id : null;
+}
+
+async function createSpreadsheet() {
+  const r = await gapi('https://sheets.googleapis.com/v4/spreadsheets', {
+    method: 'POST',
+    body: JSON.stringify({
+      properties: { title: SHEET_TITLE },
+      sheets: Object.keys(HEADERS).map(name => ({ properties: { title: name } })),
+    }),
+  });
+  const data = await r.json();
+  const id = data.spreadsheetId;
+
+  // Move into Portfolio folder
+  await gapi(`https://www.googleapis.com/drive/v3/files/${id}?addParents=${folderId}&removeParents=root`, { method: 'PATCH' });
+
+  // Write headers
+  const ranges = Object.entries(HEADERS).map(([sheet, cols]) => ({
+    range: `${sheet}!A1:${String.fromCharCode(64 + cols.length)}1`,
+    values: [cols],
+  }));
+  await gapi(`https://sheets.googleapis.com/v4/spreadsheets/${id}/values:batchUpdate`, {
+    method: 'POST',
+    body: JSON.stringify({ valueInputOption: 'RAW', data: ranges }),
+  });
+
+  // Style headers: indigo bg, white bold, frozen row
+  const meta = await gapi(`https://sheets.googleapis.com/v4/spreadsheets/${id}?fields=sheets.properties`);
+  const metaData = await meta.json();
+  const requests = [];
+  for (const s of (metaData.sheets || [])) {
+    const sheetId = s.properties.sheetId;
+    const colCount = (HEADERS[s.properties.title] || []).length || 8;
+    requests.push({
+      repeatCell: {
+        range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: colCount },
+        cell: { userEnteredFormat: {
+          backgroundColor: { red: 0.39, green: 0.4, blue: 0.945 },
+          textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 11 },
+        }},
+        fields: 'userEnteredFormat(backgroundColor,textFormat)',
+      }
+    });
+    requests.push({
+      updateSheetProperties: {
+        properties: { sheetId, gridProperties: { frozenRowCount: 1 } },
+        fields: 'gridProperties.frozenRowCount',
+      }
+    });
+  }
+  await gapi(`https://sheets.googleapis.com/v4/spreadsheets/${id}:batchUpdate`, {
+    method: 'POST', body: JSON.stringify({ requests }),
+  });
+
+  // Default settings
+  await gapi(`https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Settings!A2:B2?valueInputOption=RAW`, {
+    method: 'PUT',
+    body: JSON.stringify({ values: [['tax_rate', '0.24']] }),
+  });
+
+  return id;
+}
+
+async function readAllSheets() {
+  const ranges = Object.keys(HEADERS).map(s => `${s}!A1:Z1000`);
+  const params = ranges.map(r => `ranges=${encodeURIComponent(r)}`).join('&');
+  const r = await gapi(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?${params}`);
+  const data = await r.json();
+
+  const result = {};
+  for (const vr of (data.valueRanges || [])) {
+    const sheetName = vr.range.split('!')[0].replace(/'/g, '');
+    const rows = vr.values || [];
+    if (rows.length <= 1) { result[sheetName] = []; continue; }
+    const headers = rows[0];
+    result[sheetName] = rows.slice(1).map(row => {
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = row[i] || ''; });
+      return obj;
+    });
+  }
+  return result;
+}
+
+function sheetsToPortfolio(sheets) {
+  const p = { accounts: {}, tw_stocks: [], bonds: [], loans: [], settings: { tax_rate: 0.24 } };
+
+  // US Stocks
+  for (const row of (sheets.US_Stocks || [])) {
+    const acct = row.account || 'Default';
+    if (!p.accounts[acct]) p.accounts[acct] = { us_stocks: [], options: [] };
+    p.accounts[acct].us_stocks.push({
+      ticker: row.ticker, shares: parseFloat(row.shares) || 0, avg_cost: parseFloat(row.avg_cost) || 0,
+    });
+  }
+
+  // Options
+  for (const row of (sheets.Options || [])) {
+    const acct = row.account || 'Default';
+    if (!p.accounts[acct]) p.accounts[acct] = { us_stocks: [], options: [] };
+    p.accounts[acct].options.push({
+      ticker: row.ticker, expiry: row.expiry, strike: parseFloat(row.strike) || 0,
+      type: row.type || 'put', qty: parseInt(row.qty) || -1, cost: parseFloat(row.cost) || 0,
+    });
+  }
+
+  // TW Stocks
+  for (const row of (sheets.TW_Stocks || [])) {
+    p.tw_stocks.push({
+      ticker: row.ticker, name: row.name || '', account: row.account || '',
+      shares: parseFloat(row.shares) || 0, avg_cost_twd: parseFloat(row.avg_cost_twd) || 0,
+    });
+  }
+
+  // Bonds
+  for (const row of (sheets.Bonds || [])) {
+    p.bonds.push({
+      name: row.name, face_value: parseFloat(row.face_value) || 0,
+      coupon_rate: parseFloat(row.coupon_rate) || 0, maturity: row.maturity || '',
+      cost: parseFloat(row.cost) || 0,
+    });
+  }
+
+  // Loans
+  for (const row of (sheets.Loans || [])) {
+    p.loans.push({
+      name: row.name, rate: parseFloat(row.rate) || 0,
+      balance_twd: parseFloat(row.balance_twd) || 0, monthly_payment_twd: parseFloat(row.monthly_payment_twd) || 0,
+    });
+  }
+
+  // Income
+  p.income_items = [];
+  for (const row of (sheets.Income || [])) {
+    p.income_items.push({
+      name: row.name, amount_usd: parseFloat(row.amount_usd) || 0,
+      amount_twd: parseFloat(row.amount_twd) || 0, frequency: row.frequency || 'monthly',
+    });
+  }
+
+  // Settings
+  for (const row of (sheets.Settings || [])) {
+    if (row.key === 'tax_rate') p.settings.tax_rate = parseFloat(row.value) || 0.24;
+  }
+
+  return p;
+}
+
+async function writeSheet(sheetName, dataRows) {
+  const headers = HEADERS[sheetName];
+  const values = [headers, ...dataRows.map(row => headers.map(h => row[h] ?? ''))];
+  // Clear and rewrite
+  await gapi(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?valueInputOption=RAW`, {
+    method: 'PUT',
+    body: JSON.stringify({ values }),
+  });
+}
+
+function portfolioToSheetData(sheetName) {
+  if (sheetName === 'US_Stocks') {
+    const rows = [];
+    for (const [acct, data] of Object.entries(portfolio.accounts || {})) {
+      for (const s of (data.us_stocks || [])) {
+        rows.push({ account: acct, ticker: s.ticker, shares: s.shares, avg_cost: s.avg_cost });
+      }
+    }
+    return rows;
+  }
+  if (sheetName === 'Options') {
+    const rows = [];
+    for (const [acct, data] of Object.entries(portfolio.accounts || {})) {
+      for (const o of (data.options || [])) {
+        rows.push({ account: acct, ticker: o.ticker, expiry: o.expiry, strike: o.strike, type: o.type, qty: o.qty, cost: o.cost });
+      }
+    }
+    return rows;
+  }
+  if (sheetName === 'TW_Stocks') return portfolio.tw_stocks || [];
+  if (sheetName === 'Bonds') return portfolio.bonds || [];
+  if (sheetName === 'Loans') return portfolio.loans || [];
+  if (sheetName === 'Income') return portfolio.income_items || [];
+  return [];
+}
+
+async function saveSheet(sheetName) {
+  await writeSheet(sheetName, portfolioToSheetData(sheetName));
+}
+
+// --- Load Portfolio ---
+async function loadPortfolio() {
+  document.getElementById('networth-display').textContent = 'Loading...';
+  try {
+    // Find or create folder, then find or create sheet inside it
+    folderId = await findOrCreateFolder();
+
+    const cacheKey = `portfolio_sheet_${gUser.email}`;
+    const cachedId = localStorage.getItem(cacheKey);
+    if (cachedId) {
+      try {
+        const check = await gapi(`https://sheets.googleapis.com/v4/spreadsheets/${cachedId}?fields=spreadsheetId`);
+        if (check.ok) spreadsheetId = cachedId;
+      } catch(e) { /* will search */ }
+    }
+
+    if (!spreadsheetId) spreadsheetId = await findSpreadsheet();
+    if (!spreadsheetId) spreadsheetId = await createSpreadsheet();
+
+    localStorage.setItem(cacheKey, spreadsheetId);
+
+    // Show "Open in Sheets" and "Open Folder" links
+    const sheetsLink = document.getElementById('sheets-link');
+    sheetsLink.href = `https://docs.google.com/spreadsheets/d/${spreadsheetId}`;
+    sheetsLink.style.display = 'inline-block';
+    if (folderId) {
+      const folderLink = document.getElementById('folder-link');
+      if (folderLink) {
+        folderLink.href = `https://drive.google.com/drive/folders/${folderId}`;
+        folderLink.style.display = 'inline-block';
+      }
+    }
+
+    const sheets = await readAllSheets();
+    portfolio = sheetsToPortfolio(sheets);
+    checkShowImportBtn();
+    await refreshData();
+  } catch(e) {
+    console.error('Load portfolio error:', e);
+    document.getElementById('networth-display').textContent = 'Error loading data';
+  }
+}
+
+// --- Data Loading ---
+async function fetchQuote(ticker) {
+  if (priceCache[ticker] !== undefined) return priceCache[ticker];
+  try {
+    const r = await fetch(`${API}/api/quote/${encodeURIComponent(ticker)}`);
+    if (!r.ok) { priceCache[ticker] = null; return null; }
+    const d = await r.json();
+    priceCache[ticker] = d.price;
+    return d.price;
+  } catch(e) { priceCache[ticker] = null; return null; }
+}
+
+async function fetchFx() {
+  try {
+    const r = await fetch(`${API}/api/fx`);
+    const d = await r.json();
+    fxRate = d.USDTWD;
+    return fxRate;
+  } catch(e) { fxRate = 32; return 32; }
+}
+
+async function refreshData() {
+  if (!portfolio) return;
+  priceCache = {};
+  document.getElementById('networth-display').textContent = 'Loading...';
+
+  const tickers = new Set();
+  for (const acct of Object.values(portfolio.accounts || {})) {
+    for (const s of (acct.us_stocks || [])) tickers.add(s.ticker);
+    for (const o of (acct.options || [])) tickers.add(o.ticker);
+  }
+  for (const s of (portfolio.tw_stocks || [])) tickers.add(s.ticker);
+
+  const promises = [...tickers].map(t => fetchQuote(t));
+  promises.push(fetchFx());
+  await Promise.all(promises);
+
+  renderDashboard();
+}
+
+// --- Rendering ---
+function renderDashboard() {
+  const data = computeAll();
+  renderNetworth(data);
+  renderOverview(data);
+  renderUS(data);
+  renderTW(data);
+  renderOptions(data);
+  renderIncome(data);
+}
+
+function computeAll() {
+  const fx = fxRate || 32;
+  const result = { accounts: {}, tw: { positions: [], totalTWD: 0, costTWD: 0 }, options: [], bonds: portfolio.bonds || [], loans: portfolio.loans || [], fx };
+
+  // US Stocks by account
+  let totalUSValue = 0;
+  for (const [acctName, acctData] of Object.entries(portfolio.accounts || {})) {
+    const positions = [];
+    for (const s of (acctData.us_stocks || [])) {
+      const price = priceCache[s.ticker];
+      const pos = { ticker: s.ticker, shares: s.shares, avg_cost: s.avg_cost, current_price: price };
+      if (price) {
+        const pl = Calculator.calcStockPL(s.shares, s.avg_cost, price);
+        Object.assign(pos, pl);
+        totalUSValue += pl.market_value;
+      }
+      positions.push(pos);
+    }
+    result.accounts[acctName] = { positions, totals: Calculator.calcAccountTotals(positions) };
+  }
+  result.totalUSValue = totalUSValue;
+
+  // TW Stocks
+  for (const s of (portfolio.tw_stocks || [])) {
+    const price = priceCache[s.ticker];
+    const pos = { ticker: s.ticker, name: s.name || '', account: s.account || '', shares: s.shares, avg_cost_twd: s.avg_cost_twd, current_price_twd: price };
+    if (price) {
+      const mktVal = Math.round(price * s.shares);
+      const cost = Math.round(s.avg_cost_twd * s.shares);
+      const pl = mktVal - cost;
+      const plPct = cost ? Math.round(pl / cost * 10000) / 100 : 0;
+      Object.assign(pos, { market_value_twd: mktVal, market_value_usd: Math.round(mktVal / fx * 100) / 100, cost_basis_twd: cost, unrealized_pl_twd: pl, pl_pct: plPct });
+      result.tw.totalTWD += mktVal;
+      result.tw.costTWD += cost;
+    }
+    result.tw.positions.push(pos);
+  }
+
+  // Options
+  for (const [acctName, acctData] of Object.entries(portfolio.accounts || {})) {
+    for (const o of (acctData.options || [])) {
+      const underlying = priceCache[o.ticker];
+      const days = Calculator.calcDTE(o.expiry);
+      const urg = Calculator.calcUrgency(days);
+      const itmOtm = underlying ? Calculator.calcITMOTM(underlying, o.strike, o.type) : 'unknown';
+      // For portfolio, we don't have live option prices, so show cost only
+      result.options.push({
+        account: acctName, ticker: o.ticker, expiry: o.expiry, strike: o.strike,
+        type: o.type, qty: o.qty, cost_basis: o.cost,
+        underlying_price: underlying, itm_otm: itmOtm,
+        dte: days, urgency: urg,
+        current_value: null, unrealized_pl: null, pl_pct: null,
+        action: Calculator.suggestAction(days, 0, itmOtm),
+      });
+    }
+  }
+  result.options.sort((a, b) => a.dte - b.dte);
+
+  // Net worth
+  const bondsCost = result.bonds.reduce((s, b) => s + (b.cost || 0), 0);
+  const loansTWD = result.loans.reduce((s, l) => s + (l.balance_twd || 0), 0);
+  result.networth = Calculator.calcNetWorth(totalUSValue, result.tw.totalTWD, bondsCost, loansTWD, fx);
+
+  // Income
+  const taxRate = portfolio.settings?.tax_rate || 0.24;
+  result.income = Calculator.calcBondIncome(result.bonds, taxRate);
+  result.monthlyPayments = result.loans.reduce((s, l) => s + (l.monthly_payment_twd || 0), 0);
+
+  // Income/expense items
+  result.incomeItems = portfolio.income_items || [];
+  result.monthlyIncomeUSD = 0;
+  for (const item of result.incomeItems) {
+    let usd = item.amount_usd || 0;
+    let twd = item.amount_twd || 0;
+    let monthlyUSD = usd + twd / fx;
+    if (item.frequency === 'yearly') monthlyUSD /= 12;
+    result.monthlyIncomeUSD += monthlyUSD;
+  }
+
+  return result;
+}
+
+function renderNetworth(d) {
+  const nw = d.networth;
+  document.getElementById('networth-display').innerHTML =
+    `USD $${fmtInt(nw.net_worth_usd)}<div style="font-size:16px;color:#94a3b8;margin-top:4px">NT$ ${fmtInt(nw.net_worth_twd)}</div>`;
+  document.getElementById('networth-sub').textContent = '';
+  document.getElementById('fx-display').textContent = `USD/TWD ${d.fx}`;
+}
+
+function renderOverview(d) {
+  const nw = d.networth;
+  const allUS = Object.values(d.accounts).reduce((a, v) => ({ total_pl: (a.total_pl||0) + v.totals.total_pl, total_pl_pct: 0 }), {});
+  const usPlPct = Object.values(d.accounts).reduce((a, v) => a + v.totals.total_cost_basis, 0);
+  allUS.total_pl_pct = usPlPct ? Math.round(allUS.total_pl / usPlPct * 10000) / 100 : 0;
+
+  const twPl = d.tw.totalTWD - d.tw.costTWD;
+  const twPlPct = d.tw.costTWD ? Math.round(twPl / d.tw.costTWD * 10000) / 100 : 0;
+  const urgentOpts = d.options.filter(p => p.urgency === 'red').length;
+  const monthlyNet = d.income.monthly_net + d.monthlyIncomeUSD - d.monthlyPayments / d.fx;
+
+  document.getElementById('overview-grid').innerHTML = `
+    <div class="summary-item" style="grid-column:1/-1; background:linear-gradient(135deg,#6366f1,#818cf8); color:#fff;">
+      <div class="summary-label" style="font-size:15px; color:rgba(255,255,255,0.8);">總資產 (USD)</div>
+      <div class="summary-value" style="font-size:28px; color:#fff;">USD $${fmtInt(nw.total_assets_usd)}</div>
+      <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:15px; color:rgba(255,255,255,0.8);">
+        <span>美股 $${fmtInt(nw.us_stocks_usd)}</span>
+        <span>台股 NT$${fmtInt(nw.tw_stocks_twd)}</span>
+        <span>債券 $${fmtInt(nw.bonds_cost_usd)}</span>
+      </div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">美股</div>
+      <div class="summary-value">$${fmt(nw.us_stocks_usd)}</div>
+      <div class="summary-label ${plClass(allUS.total_pl)}">${plSign(allUS.total_pl)}$${fmt(allUS.total_pl)} (${allUS.total_pl_pct}%)</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">台股</div>
+      <div class="summary-value">NT$${fmtInt(nw.tw_stocks_twd)}</div>
+      <div class="summary-label ${plClass(twPl)}">${plSign(twPl)}NT$${fmtInt(twPl)} (${twPlPct}%)</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">債券</div>
+      <div class="summary-value">$${fmt(nw.bonds_cost_usd)}</div>
+      <div class="summary-label pl-pos">月配 $${fmt(d.income.monthly_net)}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">貸款</div>
+      <div class="summary-value">NT$${fmtInt(nw.total_loans_twd)}</div>
+      <div class="summary-label pl-neg">月付 NT$${fmtInt(d.monthlyPayments)}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">選擇權</div>
+      <div class="summary-value">${d.options.length} 筆</div>
+      <div class="summary-label ${urgentOpts > 0 ? 'pl-neg' : ''}">${urgentOpts > 0 ? urgentOpts + ' 筆需處理' : '無緊急'}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">月現金流 (USD)</div>
+      <div class="summary-value ${plClass(monthlyNet)}">${plSign(monthlyNet)}$${fmt(monthlyNet)}</div>
+      <div class="summary-label" style="color:#94a3b8">配息 - 貸款月付</div>
+    </div>
+  `;
+
+  renderCharts(d);
+}
+
+let chartAssets = null;
+
+function renderCharts(d) {
+  Chart.register(ChartDataLabels);
+  const nw = d.networth;
+
+  // Asset allocation doughnut — labels directly on chart, no legend
+  const assetLabels = [];
+  const assetValues = [];
+  const assetColors = ['#6366f1', '#f59e0b', '#10b981', '#8b5cf6'];
+  if (nw.us_stocks_usd > 0) { assetLabels.push('美股'); assetValues.push(Math.round(nw.us_stocks_usd)); }
+  if (nw.tw_stocks_usd > 0) { assetLabels.push('台股'); assetValues.push(Math.round(nw.tw_stocks_usd)); }
+  if (nw.bonds_cost_usd > 0) { assetLabels.push('債券'); assetValues.push(Math.round(nw.bonds_cost_usd)); }
+
+  if (chartAssets) chartAssets.destroy();
+  const ctxA = document.getElementById('chart-assets');
+  if (ctxA && assetValues.length > 0) {
+    const total = assetValues.reduce((a, b) => a + b, 0);
+    chartAssets = new Chart(ctxA, {
+      type: 'doughnut',
+      data: {
+        labels: assetLabels,
+        datasets: [{ data: assetValues, backgroundColor: assetColors.slice(0, assetValues.length), borderWidth: 2, borderColor: '#fff' }],
+      },
+      options: {
+        responsive: true,
+        cutout: '55%',
+        layout: { padding: 16 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.label}: $${fmtInt(ctx.raw)} (${Math.round(ctx.raw / total * 100)}%)`,
+            }
+          },
+          datalabels: {
+            color: '#fff',
+            font: { size: 13, weight: '600' },
+            formatter: (value, ctx) => {
+              const pct = Math.round(value / total * 100);
+              return `${ctx.chart.data.labels[ctx.dataIndex]}\n${pct}%`;
+            },
+            textAlign: 'center',
+            display: (ctx) => {
+              const pct = ctx.dataset.data[ctx.dataIndex] / total;
+              return pct > 0.05; // hide label if slice < 5%
+            },
+          },
+        },
+      },
+    });
+  }
+
+  // Cashflow list
+  const cfItems = [];
+  for (const item of (d.incomeItems || [])) {
+    let monthlyUSD = (item.amount_usd || 0) + (item.amount_twd || 0) / d.fx;
+    if (item.frequency === 'yearly') monthlyUSD /= 12;
+    cfItems.push({ name: item.name, amount: Math.round(monthlyUSD) });
+  }
+  if (d.income.monthly_net > 0) cfItems.push({ name: '債券配息', amount: Math.round(d.income.monthly_net) });
+  if (d.monthlyPayments > 0) cfItems.push({ name: '貸款月付', amount: -Math.round(d.monthlyPayments / d.fx) });
+
+  const maxAbs = Math.max(...cfItems.map(i => Math.abs(i.amount)), 1);
+  const totalIncome = cfItems.filter(i => i.amount > 0).reduce((s, i) => s + i.amount, 0);
+  const totalExpense = cfItems.filter(i => i.amount < 0).reduce((s, i) => s + Math.abs(i.amount), 0);
+  const netCF = totalIncome - totalExpense;
+
+  let cfHtml = '';
+  for (const item of cfItems) {
+    const isIncome = item.amount >= 0;
+    const color = isIncome ? '#22c55e' : '#ef4444';
+    const width = Math.round(Math.abs(item.amount) / maxAbs * 100);
+    cfHtml += `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;">
+      <div style="width:80px;font-size:14px;color:#475569;flex-shrink:0">${item.name}</div>
+      <div style="flex:1;background:#f1f5f9;border-radius:4px;height:20px;overflow:hidden;">
+        <div style="width:${width}%;height:100%;background:${color};border-radius:4px;"></div>
+      </div>
+      <div style="width:80px;text-align:right;font-size:14px;font-weight:600;color:${color};flex-shrink:0">${isIncome ? '+' : '-'}$${fmtInt(Math.abs(item.amount))}</div>
+    </div>`;
+  }
+  cfHtml += `<div style="display:flex;justify-content:space-between;padding:12px 0 4px;font-size:16px;font-weight:700;border-top:2px solid #e2e8f0;margin-top:4px;">
+    <span>淨現金流</span>
+    <span class="${plClass(netCF)}">${plSign(netCF)}$${fmtInt(Math.abs(netCF))}/月</span>
+  </div>`;
+
+  const cfEl = document.getElementById('cashflow-list');
+  if (cfEl) cfEl.innerHTML = cfItems.length > 0 ? cfHtml : '<div style="color:#94a3b8;text-align:center;padding:16px">尚無現金流項目</div>';
+}
+
+function renderUS(d) {
+  const accounts = d.accounts;
+  if (Object.keys(accounts).length === 0) {
+    document.getElementById('us-content').innerHTML = '<div class="empty-state"><p>尚無美股持倉，點擊上方按鈕新增</p></div>';
+    return;
+  }
+  let html = '';
+  // Summary
+  let allPositions = [];
+  for (const info of Object.values(accounts)) allPositions.push(...info.positions);
+  const summary = Calculator.calcAccountTotals(allPositions);
+  for (const [acct, info] of Object.entries(accounts)) {
+    const t = info.totals;
+    html += `<div class="card">
+      <div class="card-title account-toggle" onclick="this.parentElement.querySelector('.tbl-wrap').style.display=this.parentElement.querySelector('.tbl-wrap').style.display==='none'?'block':'none'">${acct}</div>
+      <div class="acct-summary">
+        Market Value = <span>$${fmt(t.total_market_value)}</span>
+        Gain/Loss($) = <span class="${plClass(t.total_pl)}">${plSign(t.total_pl)}$${fmt(t.total_pl)}</span>
+        Gain/Loss(%) = <span class="${plClass(t.total_pl)}">${plSign(t.total_pl_pct)}${t.total_pl_pct}%</span>
+      </div>
+      <div class="tbl-wrap"><table class="pos-tbl">
+        <tr><th>Symbol</th><th>Qty</th><th>Last</th><th>Market Value</th><th>Unit Cost</th><th>Total Cost</th><th>Gain/Loss($)</th><th>Gain/Loss(%)</th><th></th></tr>`;
+    for (const p of info.positions) {
+      const hasPrice = p.current_price != null;
+      const cost = p.shares * p.avg_cost;
+      const mv = hasPrice ? p.current_price * p.shares : 0;
+      html += `<tr>
+        <td class="sym">${p.ticker}</td>
+        <td>${p.shares}</td>
+        <td>${hasPrice ? fmt(p.current_price,2) : 'N/A'}</td>
+        <td>${hasPrice ? '$'+fmt(mv) : 'N/A'}</td>
+        <td>${fmt(p.avg_cost,2)}</td>
+        <td>$${fmt(cost)}</td>
+        <td class="${plClass(p.unrealized_pl)}">${hasPrice ? plSign(p.unrealized_pl)+'$'+fmt(p.unrealized_pl) : '-'}</td>
+        <td class="${plClass(p.unrealized_pl)}">${hasPrice ? plSign(p.pl_pct)+p.pl_pct+'%' : '-'}</td>
+        <td><button class="delete-btn" onclick="deleteUSStock('${acct}','${p.ticker}')" title="刪除">×</button></td>
+      </tr>`;
+    }
+    html += '</table></div></div>';
+  }
+  document.getElementById('us-content').innerHTML = html;
+}
+
+function renderTW(d) {
+  const positions = d.tw.positions;
+  if (positions.length === 0) {
+    document.getElementById('tw-content').innerHTML = '<div class="empty-state"><p>尚無台股持倉，點擊上方按鈕新增</p></div>';
+    return;
+  }
+  let html = '';
+  const twPl = d.tw.totalTWD - d.tw.costTWD;
+  const twPlPct = d.tw.costTWD ? Math.round(twPl / d.tw.costTWD * 10000) / 100 : 0;
+
+  // Group by account
+  const byAcct = {};
+  for (const p of positions) {
+    const a = p.account || '預設';
+    if (!byAcct[a]) byAcct[a] = [];
+    byAcct[a].push(p);
+  }
+  for (const [acct, ps] of Object.entries(byAcct)) {
+    let acctCost = 0, acctMV = 0;
+    for (const p of ps) { acctCost += p.shares * p.avg_cost_twd; if (p.current_price_twd) acctMV += p.current_price_twd * p.shares; }
+    const acctPl = acctMV - acctCost;
+    const acctPlPct = acctCost ? Math.round(acctPl / acctCost * 10000) / 100 : 0;
+    html += `<div class="card">
+      <div class="card-title account-toggle" onclick="this.parentElement.querySelector('.tbl-wrap').style.display=this.parentElement.querySelector('.tbl-wrap').style.display==='none'?'block':'none'">${acct}</div>
+      <div class="acct-summary">
+        Market Value = <span>NT$${fmtInt(acctMV)}</span>
+        Gain/Loss($) = <span class="${plClass(acctPl)}">${plSign(acctPl)}NT$${fmtInt(acctPl)}</span>
+        Gain/Loss(%) = <span class="${plClass(acctPl)}">${plSign(acctPlPct)}${acctPlPct}%</span>
+      </div>
+      <div class="tbl-wrap"><table class="pos-tbl">
+        <tr><th>Symbol</th><th>Name</th><th>Qty</th><th>Last</th><th>Market Value</th><th>Unit Cost</th><th>Total Cost</th><th>Gain/Loss($)</th><th>Gain/Loss(%)</th><th></th></tr>`;
+    for (const p of ps) {
+      const hasPrice = p.current_price_twd != null;
+      const costTWD = p.shares * p.avg_cost_twd;
+      const mvTWD = hasPrice ? p.current_price_twd * p.shares : 0;
+      html += `<tr>
+        <td class="sym">${p.ticker}</td>
+        <td>${p.name || ''}</td>
+        <td>${fmtInt(p.shares)}</td>
+        <td>${hasPrice ? fmt(p.current_price_twd,2) : 'N/A'}</td>
+        <td>${hasPrice ? 'NT$'+fmtInt(mvTWD) : 'N/A'}</td>
+        <td>${fmt(p.avg_cost_twd,2)}</td>
+        <td>NT$${fmtInt(costTWD)}</td>
+        <td class="${plClass(p.unrealized_pl_twd)}">${hasPrice ? plSign(p.unrealized_pl_twd)+'NT$'+fmtInt(p.unrealized_pl_twd) : '-'}</td>
+        <td class="${plClass(p.unrealized_pl_twd)}">${hasPrice ? plSign(p.pl_pct)+p.pl_pct+'%' : '-'}</td>
+        <td><button class="delete-btn" onclick="deleteTWStock('${p.ticker}')" title="刪除">×</button></td>
+      </tr>`;
+    }
+    html += '</table></div></div>';
+  }
+  document.getElementById('tw-content').innerHTML = html;
+}
+
+function renderOptions(d) {
+  const opts = d.options;
+  if (opts.length === 0) {
+    document.getElementById('options-content').innerHTML = '<div class="empty-state"><p>尚無選擇權部位，點擊上方按鈕新增</p></div>';
+    return;
+  }
+  let html = `<div class="card">
+    <div class="tbl-wrap"><table class="pos-tbl">
+      <tr><th>Symbol</th><th>Expiry</th><th>Strike</th><th>Type</th><th>Qty</th><th>Cost</th><th>DTE</th><th>ITM/OTM</th><th>Action</th><th></th></tr>`;
+  for (const p of opts) {
+    const urgBadge = p.urgency === 'red' ? 'badge-red' : p.urgency === 'yellow' ? 'badge-yellow' : 'badge-green';
+    const actionClass = p.action.includes('URGENT') || p.action === 'EXPIRED' ? 'action-urgent' : p.action.includes('Close') || p.action === 'Let expire' ? 'action-close' : '';
+    html += `<tr>
+      <td class="sym">${p.ticker}</td>
+      <td>${p.expiry}</td>
+      <td>${p.strike}</td>
+      <td>${p.type.toUpperCase()}</td>
+      <td>${p.qty}</td>
+      <td>$${fmt(p.cost_basis)}</td>
+      <td><span class="badge ${urgBadge}">${p.dte}d</span></td>
+      <td>${p.itm_otm}</td>
+      <td><span class="action-tag ${actionClass}">${p.action}</span></td>
+      <td><button class="delete-btn" onclick="deleteOption('${p.account}','${p.ticker}','${p.expiry}',${p.strike},'${p.type}')" title="刪除">×</button></td>
+    </tr>`;
+  }
+  html += '</table></div></div>';
+  document.getElementById('options-content').innerHTML = html;
+}
+
+function renderIncome(d) {
+  const inc = d.income;
+  const loans = d.loans;
+  const bonds = d.bonds;
+  const items = d.incomeItems || [];
+  const totalMonthlyNet = inc.monthly_net + d.monthlyIncomeUSD - d.monthlyPayments / d.fx;
+
+  // Income/expense items
+  let itemsHtml = '';
+  for (const item of items) {
+    const isExpense = (item.amount_usd < 0 || item.amount_twd < 0);
+    const display = item.amount_usd ? `$${fmtInt(item.amount_usd)}` : `NT$${fmtInt(item.amount_twd)}`;
+    const freqLabel = item.frequency === 'yearly' ? '/年' : '/月';
+    itemsHtml += `<div class="row">
+      <div>${item.name} <span style="color:#64748b;font-size:12px">${freqLabel}</span></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="${isExpense ? 'pl-neg' : 'pl-pos'}">${display}</span>
+        <button class="delete-btn" onclick="deleteIncomeItem('${item.name}')" title="刪除">×</button>
+      </div>
+    </div>`;
+  }
+
+  let bondsHtml = '';
+  for (const b of bonds) {
+    bondsHtml += `<div class="row">
+      <div>${b.name}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span>$${fmtInt(b.face_value)} @ ${(b.coupon_rate*100).toFixed(1)}%</span>
+        <button class="delete-btn" onclick="deleteBond('${b.name}')" title="刪除">×</button>
+      </div>
+    </div>`;
+  }
+
+  let loansHtml = '';
+  for (const l of loans) {
+    loansHtml += `<div class="row">
+      <div>${l.name}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span>NT$${fmtInt(l.balance_twd)} @ ${(l.rate*100).toFixed(2)}%</span>
+        <button class="delete-btn" onclick="deleteLoan('${l.name}')" title="刪除">×</button>
+      </div>
+    </div>`;
+  }
+
+  // Cashflow breakdown
+  let cashflowRows = '';
+  for (const item of items) {
+    let monthlyUSD = (item.amount_usd || 0) + (item.amount_twd || 0) / d.fx;
+    if (item.frequency === 'yearly') monthlyUSD /= 12;
+    const sign = monthlyUSD >= 0 ? '+' : '';
+    cashflowRows += `<div class="row"><div>${item.name}</div><div class="${plClass(monthlyUSD)}">${sign}$${fmt(monthlyUSD)}</div></div>`;
+  }
+  if (bonds.length > 0) {
+    cashflowRows += `<div class="row"><div>債券配息</div><div class="pl-pos">+$${fmt(inc.monthly_net)}</div></div>`;
+  }
+  if (loans.length > 0) {
+    cashflowRows += `<div class="row"><div>貸款月付</div><div class="pl-neg">-$${fmt(d.monthlyPayments / d.fx)}</div></div>`;
+  }
+
+  document.getElementById('income-content').innerHTML = `
+    ${items.length > 0 ? `<div class="card">
+      <div class="card-title">收入/支出項目</div>
+      ${itemsHtml}
+    </div>` : ''}
+    ${bonds.length > 0 ? `<div class="card">
+      <div class="card-title">債券配息</div>
+      ${bondsHtml}
+      <div style="border-top:1px solid #e2e8f0;margin-top:8px;padding-top:8px">
+        <div class="row"><div>年化毛收入</div><div class="price-main">$${fmtInt(inc.annual_gross)}</div></div>
+        <div class="row"><div>稅率 ${inc.withholding_tax_rate}</div><div>年淨 $${fmtInt(inc.annual_net)}</div></div>
+        <div class="row"><div>月淨收入</div><div class="price-main pl-pos">$${fmt(inc.monthly_net)}</div></div>
+      </div>
+    </div>` : ''}
+    ${loans.length > 0 ? `<div class="card">
+      <div class="card-title">貸款</div>
+      ${loansHtml}
+      <div style="border-top:1px solid #e2e8f0;margin-top:8px;padding-top:8px">
+        <div class="row"><div>月付金合計</div><div class="price-main pl-neg">NT$${fmtInt(d.monthlyPayments)}</div></div>
+      </div>
+    </div>` : ''}
+    <div class="card">
+      <div class="card-title">月現金流摘要 (USD)</div>
+      ${cashflowRows || '<div style="color:#64748b;padding:8px 0">尚無收入/支出項目</div>'}
+      ${cashflowRows ? `<div class="row" style="border-top:2px solid #475569;margin-top:4px;padding-top:8px"><div><strong>淨現金流</strong></div><div class="price-main ${plClass(totalMonthlyNet)}">${plSign(totalMonthlyNet)}$${fmt(totalMonthlyNet)}</div></div>` : ''}
+    </div>
+  `;
+}
+
+// --- Tab Navigation ---
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// --- Modal Forms ---
+function openModal(type) {
+  const modal = document.getElementById('modal-content');
+  const overlay = document.getElementById('modal-overlay');
+
+  const forms = {
+    'us-stock': `
+      <h3>新增美股持倉</h3>
+      <div class="form-group"><label>帳戶</label><input id="f-account" placeholder="e.g. Firstrade"></div>
+      <div class="form-group"><label>Ticker</label><input id="f-ticker" placeholder="e.g. NVDA" style="text-transform:uppercase"></div>
+      <div class="form-group"><label>股數</label><input id="f-shares" type="number" step="any"></div>
+      <div class="form-group"><label>平均成本 (USD)</label><input id="f-cost" type="number" step="any"></div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveUSStock()">儲存</button>
+      </div>`,
+    'tw-stock': `
+      <h3>新增台股持倉</h3>
+      <div class="form-group"><label>帳戶</label><input id="f-account" placeholder="e.g. 永豐"></div>
+      <div class="form-group"><label>Ticker</label><input id="f-ticker" placeholder="e.g. 2330.TW"></div>
+      <div class="form-group"><label>名稱</label><input id="f-name" placeholder="e.g. 台積電"></div>
+      <div class="form-group"><label>股數</label><input id="f-shares" type="number" step="any"></div>
+      <div class="form-group"><label>平均成本 (TWD)</label><input id="f-cost" type="number" step="any"></div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveTWStock()">儲存</button>
+      </div>`,
+    'option': `
+      <h3>新增選擇權</h3>
+      <div class="form-group"><label>帳戶</label><input id="f-account" placeholder="e.g. Firstrade"></div>
+      <div class="form-group"><label>Ticker</label><input id="f-ticker" placeholder="e.g. NVDA" style="text-transform:uppercase"></div>
+      <div class="form-group"><label>到期日</label><input id="f-expiry" type="date"></div>
+      <div class="form-group"><label>Strike</label><input id="f-strike" type="number" step="any"></div>
+      <div class="form-group"><label>Type</label><select id="f-type"><option value="put">Put</option><option value="call">Call</option></select></div>
+      <div class="form-group"><label>Qty</label><input id="f-qty" type="number" value="-1"></div>
+      <div class="form-group"><label>Cost (權利金收入)</label><input id="f-cost" type="number" step="any"></div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveOption()">儲存</button>
+      </div>`,
+    'bond': `
+      <h3>新增債券</h3>
+      <div class="form-group"><label>名稱</label><input id="f-name" placeholder="e.g. Bond A"></div>
+      <div class="form-group"><label>面值 (USD)</label><input id="f-face" type="number" step="any"></div>
+      <div class="form-group"><label>票面利率 (%)</label><input id="f-coupon" type="number" step="any" placeholder="e.g. 5.0"></div>
+      <div class="form-group"><label>到期日</label><input id="f-maturity" type="date"></div>
+      <div class="form-group"><label>成本 (USD)</label><input id="f-cost" type="number" step="any"></div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveBond()">儲存</button>
+      </div>`,
+    'income-item': `
+      <h3>新增收入/支出</h3>
+      <div class="form-group"><label>名稱</label><input id="f-name" placeholder="e.g. 薪水、房租"></div>
+      <div class="form-group"><label>金額 (USD，支出填負數)</label><input id="f-usd" type="number" step="any" placeholder="e.g. 500 或 -200"></div>
+      <div class="form-group"><label>金額 (TWD，支出填負數)</label><input id="f-twd" type="number" step="any" placeholder="e.g. 150000 或 -30000"></div>
+      <div class="form-group"><label>頻率</label><select id="f-freq"><option value="monthly">每月</option><option value="yearly">每年</option></select></div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveIncomeItem()">儲存</button>
+      </div>`,
+    'loan': `
+      <h3>新增貸款</h3>
+      <div class="form-group"><label>名稱</label><input id="f-name" placeholder="e.g. 房貸"></div>
+      <div class="form-group"><label>利率 (%)</label><input id="f-rate" type="number" step="any" placeholder="e.g. 2.0"></div>
+      <div class="form-group"><label>餘額 (TWD)</label><input id="f-balance" type="number" step="any"></div>
+      <div class="form-group"><label>月付金 (TWD)</label><input id="f-monthly" type="number" step="any"></div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveLoan()">儲存</button>
+      </div>`,
+  };
+
+  modal.innerHTML = forms[type] || '';
+  overlay.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+
+// --- CRUD Operations ---
+async function saveUSStock() {
+  const account = document.getElementById('f-account').value.trim();
+  const ticker = document.getElementById('f-ticker').value.trim().toUpperCase();
+  const shares = parseFloat(document.getElementById('f-shares').value);
+  const avgCost = parseFloat(document.getElementById('f-cost').value);
+  if (!account || !ticker || isNaN(shares) || isNaN(avgCost)) return alert('請填寫所有欄位');
+
+  if (!portfolio.accounts[account]) portfolio.accounts[account] = { us_stocks: [], options: [] };
+  if (!portfolio.accounts[account].us_stocks) portfolio.accounts[account].us_stocks = [];
+  portfolio.accounts[account].us_stocks.push({ ticker, shares, avg_cost: avgCost });
+  closeModal();
+  await saveSheet('US_Stocks');
+  await refreshData();
+}
+
+async function saveTWStock() {
+  const account = document.getElementById('f-account').value.trim();
+  const ticker = document.getElementById('f-ticker').value.trim();
+  const name = document.getElementById('f-name').value.trim();
+  const shares = parseFloat(document.getElementById('f-shares').value);
+  const avgCost = parseFloat(document.getElementById('f-cost').value);
+  if (!ticker || isNaN(shares) || isNaN(avgCost)) return alert('請填寫必要欄位');
+
+  if (!portfolio.tw_stocks) portfolio.tw_stocks = [];
+  portfolio.tw_stocks.push({ ticker, name, account, shares, avg_cost_twd: avgCost });
+  closeModal();
+  await saveSheet('TW_Stocks');
+  await refreshData();
+}
+
+async function saveOption() {
+  const account = document.getElementById('f-account').value.trim();
+  const ticker = document.getElementById('f-ticker').value.trim().toUpperCase();
+  const expiry = document.getElementById('f-expiry').value;
+  const strike = parseFloat(document.getElementById('f-strike').value);
+  const type = document.getElementById('f-type').value;
+  const qty = parseInt(document.getElementById('f-qty').value);
+  const cost = parseFloat(document.getElementById('f-cost').value);
+  if (!account || !ticker || !expiry || isNaN(strike) || isNaN(cost)) return alert('請填寫所有欄位');
+
+  if (!portfolio.accounts[account]) portfolio.accounts[account] = { us_stocks: [], options: [] };
+  if (!portfolio.accounts[account].options) portfolio.accounts[account].options = [];
+  portfolio.accounts[account].options.push({ ticker, expiry, strike, type, qty, cost });
+  closeModal();
+  await saveSheet('Options');
+  await refreshData();
+}
+
+async function saveBond() {
+  const name = document.getElementById('f-name').value.trim();
+  const faceValue = parseFloat(document.getElementById('f-face').value);
+  const couponRate = parseFloat(document.getElementById('f-coupon').value) / 100;
+  const maturity = document.getElementById('f-maturity').value;
+  const cost = parseFloat(document.getElementById('f-cost').value);
+  if (!name || isNaN(faceValue) || isNaN(couponRate)) return alert('請填寫必要欄位');
+
+  if (!portfolio.bonds) portfolio.bonds = [];
+  portfolio.bonds.push({ name, face_value: faceValue, coupon_rate: couponRate, maturity, cost: cost || faceValue });
+  closeModal();
+  await saveSheet('Bonds');
+  renderDashboard();
+}
+
+async function saveLoan() {
+  const name = document.getElementById('f-name').value.trim();
+  const rate = parseFloat(document.getElementById('f-rate').value) / 100;
+  const balance = parseFloat(document.getElementById('f-balance').value);
+  const monthly = parseFloat(document.getElementById('f-monthly').value);
+  if (!name || isNaN(balance)) return alert('請填寫必要欄位');
+
+  if (!portfolio.loans) portfolio.loans = [];
+  portfolio.loans.push({ name, rate: rate || 0, balance_twd: balance, monthly_payment_twd: monthly || 0 });
+  closeModal();
+  await saveSheet('Loans');
+  renderDashboard();
+}
+
+async function deleteUSStock(account, ticker) {
+  if (!confirm(`確定刪除 ${account} 的 ${ticker}？`)) return;
+  const acct = portfolio.accounts[account];
+  if (acct && acct.us_stocks) {
+    acct.us_stocks = acct.us_stocks.filter(s => s.ticker !== ticker);
+    if (acct.us_stocks.length === 0 && (!acct.options || acct.options.length === 0)) {
+      delete portfolio.accounts[account];
+    }
+  }
+  await saveSheet('US_Stocks');
+  await refreshData();
+}
+
+async function deleteTWStock(ticker) {
+  if (!confirm(`確定刪除 ${ticker}？`)) return;
+  portfolio.tw_stocks = (portfolio.tw_stocks || []).filter(s => s.ticker !== ticker);
+  await saveSheet('TW_Stocks');
+  await refreshData();
+}
+
+async function deleteOption(account, ticker, expiry, strike, type) {
+  if (!confirm(`確定刪除 ${ticker} ${strike} ${type.toUpperCase()} ${expiry}？`)) return;
+  const acct = portfolio.accounts[account];
+  if (acct && acct.options) {
+    acct.options = acct.options.filter(o =>
+      !(o.ticker === ticker && o.expiry === expiry && o.strike === strike && o.type === type)
+    );
+  }
+  await saveSheet('Options');
+  await refreshData();
+}
+
+async function saveIncomeItem() {
+  const name = document.getElementById('f-name').value.trim();
+  const amountUsd = parseFloat(document.getElementById('f-usd').value) || 0;
+  const amountTwd = parseFloat(document.getElementById('f-twd').value) || 0;
+  const frequency = document.getElementById('f-freq').value;
+  if (!name || (amountUsd === 0 && amountTwd === 0)) return alert('請填寫名稱和金額');
+
+  if (!portfolio.income_items) portfolio.income_items = [];
+  portfolio.income_items.push({ name, amount_usd: amountUsd, amount_twd: amountTwd, frequency });
+  closeModal();
+  await saveSheet('Income');
+  renderDashboard();
+}
+
+async function deleteIncomeItem(name) {
+  if (!confirm(`確定刪除 ${name}？`)) return;
+  portfolio.income_items = (portfolio.income_items || []).filter(i => i.name !== name);
+  await saveSheet('Income');
+  renderDashboard();
+}
+
+async function deleteBond(name) {
+  if (!confirm(`確定刪除債券 ${name}？`)) return;
+  portfolio.bonds = (portfolio.bonds || []).filter(b => b.name !== name);
+  await saveSheet('Bonds');
+  renderDashboard();
+}
+
+async function deleteLoan(name) {
+  if (!confirm(`確定刪除貸款 ${name}？`)) return;
+  portfolio.loans = (portfolio.loans || []).filter(l => l.name !== name);
+  await saveSheet('Loans');
+  renderDashboard();
+}
+
+// --- Import from Notion ---
+async function importFromNotion() {
+  if (!confirm('從 Notion 匯入會覆蓋目前 Google Sheets 的資料，確定？')) return;
+  const btn = document.getElementById('import-btn');
+  btn.textContent = '匯入中...';
+  btn.disabled = true;
+
+  try {
+    // Fetch all data from Notion via API
+    const [usR, twR, optR, bondR, loanR] = await Promise.all([
+      fetch('/api/stocks/us'), fetch('/api/stocks/tw'), fetch('/api/options'),
+      fetch('/api/bonds'), fetch('/api/loans'),
+    ]);
+    const [usJson, twJson, optJson, bondJson, loanJson] = await Promise.all([
+      usR.json(), twR.json(), optR.json(), bondR.json(), loanR.json(),
+    ]);
+
+    // US Stocks
+    const usData = [];
+    for (const [acct, info] of Object.entries(usJson.accounts || {})) {
+      for (const p of info.positions) usData.push([acct, p.ticker, p.shares, p.avg_cost]);
+    }
+
+    // TW Stocks
+    const twData = [];
+    for (const [acct, info] of Object.entries(twJson.accounts || {})) {
+      for (const p of info.positions) twData.push([p.ticker, p.name || '', acct, p.shares, p.avg_cost_twd]);
+    }
+
+    // Options
+    const optData = [];
+    for (const p of (optJson.positions || [])) {
+      optData.push([p.account, p.ticker, p.expiry, p.strike, p.type, p.qty, p.cost_basis]);
+    }
+
+    // Bonds
+    const bondData = [];
+    for (const b of (bondJson.bonds || [])) {
+      bondData.push([b.name, b.face, b.coupon, b.maturity || '', b.cost]);
+    }
+
+    // Loans
+    const loanData = [];
+    for (const l of (loanJson.loans || [])) {
+      loanData.push([l.name, l.rate, l.balance, l.monthly]);
+    }
+
+    // Write all to Google Sheets
+    const h = HEADERS;
+    const batchData = [
+      { range: `US_Stocks!A1:D${usData.length + 1}`, values: [h.US_Stocks, ...usData] },
+      { range: `TW_Stocks!A1:E${twData.length + 1}`, values: [h.TW_Stocks, ...twData] },
+      { range: `Options!A1:G${optData.length + 1}`, values: [h.Options, ...optData] },
+      { range: `Bonds!A1:E${bondData.length + 1}`, values: [h.Bonds, ...bondData] },
+      { range: `Loans!A1:D${loanData.length + 1}`, values: [h.Loans, ...loanData] },
+    ];
+
+    await gapi(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`, {
+      method: 'POST',
+      body: JSON.stringify({ valueInputOption: 'RAW', data: batchData }),
+    });
+
+    // Reload
+    const sheets = await readAllSheets();
+    portfolio = sheetsToPortfolio(sheets);
+    btn.style.display = 'none';
+    alert(`匯入完成！\n美股 ${usData.length} 筆、台股 ${twData.length} 筆、選擇權 ${optData.length} 筆、債券 ${bondData.length} 筆、貸款 ${loanData.length} 筆`);
+    await refreshData();
+  } catch(e) {
+    console.error('Import error:', e);
+    alert('匯入失敗：' + e.message);
+  }
+  btn.textContent = '從 Notion 匯入';
+  btn.disabled = false;
+}
+
+function checkShowImportBtn() {
+  // Show import button if portfolio is empty
+  const hasUS = Object.values(portfolio?.accounts || {}).some(a => a.us_stocks?.length > 0);
+  const hasTW = (portfolio?.tw_stocks || []).length > 0;
+  if (!hasUS && !hasTW) {
+    document.getElementById('import-btn').style.display = 'inline-block';
+  }
+}
+
+// --- Init ---
+window.addEventListener('load', initGoogleSignIn);
+</script>
+</body>
+</html>

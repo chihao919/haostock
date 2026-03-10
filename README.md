@@ -1,58 +1,88 @@
-# Portfolio Quotes API
+# Portfolio Quotes API & 樂活五線譜
 
-即時股票、期權報價 API，供 Claude 查詢使用。
+Real-time US/TW stock quotes, options P&L, net worth tracking, and Happy Five Lines technical analysis.
 
-## 本地測試
+**Production:** https://stock.cwithb.com
+
+## Features
+
+- **Portfolio Dashboard** — US/TW stocks, options positions with P&L, bonds, loans
+- **Net Worth** — Full asset/liability overview in USD and TWD
+- **樂活五線譜** — Linear regression ± σ bands with buy/sell signals
+- **樂活通道** — 20-week Bollinger channel (SMA ± 1σ)
+- **Financial Analysis** — Huang Kuo-Hua method (TW) / Fundamental analysis (US)
+- **Trade Journal** — Record and review trades with win/loss tracking
+- **MCP Server** — Remote MCP endpoint for Claude integration (OAuth 2.1 + PKCE)
+- **Stock Screener** — Batch screening for TW/US markets
+
+## Architecture
+
+```
+Notion (portfolio data) → FastAPI on Vercel → MCP Server → Claude
+                                ↕
+                    Yahoo Finance (pricing)
+                    FinMind API (TW financials)
+```
+
+## Quick Start
+
 ```bash
 pip install -r requirements.txt
-uvicorn main:app --reload
-# 開啟 http://localhost:8000/docs 查看所有 endpoints
+
+# Run tests (unit + BDD)
+python3 -m pytest tests/ -v
+
+# Deploy
+vercel --prod
 ```
 
-## Endpoints
+## API Endpoints
 
-| Endpoint | 說明 |
-|----------|------|
-| `GET /health` | 健康檢查 |
-| `GET /fx` | USD/TWD 即時匯率 |
-| `GET /quote/{ticker}` | 單一股票報價，例如 `/quote/CCJ` |
-| `GET /stocks/us` | 所有美股持倉 + P&L |
-| `GET /stocks/tw` | 所有台股持倉 + P&L |
-| `GET /options` | 所有期權倉位 + P&L + 建議動作 |
-| `GET /networth` | 完整淨資產總覽 |
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/health` | Health check |
+| `GET /api/fx` | USD/TWD exchange rate |
+| `GET /api/quote/{ticker}` | Single stock quote |
+| `GET /api/stocks/us` | US stock positions + P&L |
+| `GET /api/stocks/tw` | TW stock positions + P&L |
+| `GET /api/options` | Options positions + actions |
+| `GET /api/networth` | Net worth overview |
+| `GET /api/bonds` | Bond holdings |
+| `GET /api/loans` | Loan balances |
+| `GET /api/trades` | Trade journal (filterable) |
+| `POST /api/trades` | Add trade record |
+| `GET /api/financial/analyze/{ticker}` | Financial analysis |
+| `GET /api/fivelines/{ticker}` | Five lines analysis |
+| `POST /mcp` | Remote MCP endpoint |
 
-## 部署到 Railway（推薦）
+## Web Pages
 
-1. 到 https://railway.app 建立帳號
-2. New Project → Deploy from GitHub Repo
-3. 把這個資料夾 push 到你的 GitHub
-4. Railway 自動偵測 Procfile 並部署
-5. 取得 URL，格式類似 `https://portfolio-api-xxxx.railway.app`
+| Path | Description |
+|------|-------------|
+| `/` | Portfolio dashboard |
+| `/fivelines` | 樂活五線譜 interactive chart |
+| `/portfolio` | Google-auth portfolio view |
 
-## 部署到 Render
+## Environment Variables
 
-1. 到 https://render.com 建立帳號
-2. New → Web Service → 連接 GitHub
-3. Build Command: `pip install -r requirements.txt`
-4. Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+| Variable | Description |
+|----------|-------------|
+| `NOTION_API_KEY` | Notion integration token |
+| `NOTION_US_STOCKS_DB` | Notion US stocks database ID |
+| `NOTION_TW_STOCKS_DB` | Notion TW stocks database ID |
+| `NOTION_OPTIONS_DB` | Notion options database ID |
+| `NOTION_BONDS_DB` | Notion bonds database ID |
+| `NOTION_LOANS_DB` | Notion loans database ID |
+| `NOTION_TRADES_DB` | Notion trades database ID |
+| `FINANCIAL_API_KEY` | API key for protected endpoints |
+| `OAUTH_CLIENT_SECRET` | OAuth client secret for MCP |
+| `FINMIND_TOKEN` | FinMind API token (TW financials) |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
 
-## 部署到 Fly.io
+## Tech Stack
 
-```bash
-brew install flyctl
-flyctl auth login
-flyctl launch
-flyctl deploy
-```
-
-## 告訴 Claude 你的 API URL
-
-部署完成後，把 URL 告訴我，例如：
-「我的 Portfolio API 網址是 https://xxx.railway.app」
-
-之後我就能直接呼叫 `https://xxx.railway.app/options` 來查詢報價了！
-
-## 安全性注意
-
-這個 API 沒有認證（任何人都能查詢）。
-如果要加保護，可以加一個 API key header，告訴我我來幫你加上去。
+- **Backend:** Python, FastAPI, httpx, numpy
+- **Frontend:** Chart.js + chartjs-plugin-zoom
+- **Data:** Notion API, Yahoo Finance, FinMind
+- **Deploy:** Vercel (serverless)
+- **Integration:** MCP Server (OAuth 2.1 + PKCE)
