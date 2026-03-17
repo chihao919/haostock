@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投資 Agent 設定</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1e293b; padding: 16px; font-size: 16px; }
+.header { text-align: center; padding: 16px 0; }
+.header h1 { font-size: 22px; color: #6366f1; }
+.header .sub { font-size: 14px; color: #475569; margin-top: 4px; }
+.card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.card-title { font-size: 16px; color: #6366f1; margin-bottom: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; color: #475569; margin-bottom: 6px; font-weight: 600; }
+.form-group input, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 15px; font-family: inherit; background: #fff; color: #1e293b; }
+.form-group input:focus, .form-group textarea:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+.form-group .hint { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+.form-group .hint a { color: #6366f1; }
+.slider-group { display: flex; align-items: center; gap: 12px; }
+.slider-group input[type=range] { flex: 1; accent-color: #6366f1; }
+.slider-group .slider-val { min-width: 50px; text-align: center; font-weight: 700; font-size: 16px; color: #dc2626; }
+.toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; }
+.toggle-label { font-size: 16px; font-weight: 600; }
+.toggle-sub { font-size: 13px; color: #94a3b8; }
+.toggle { position: relative; width: 52px; height: 28px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle .slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #cbd5e1; border-radius: 14px; cursor: pointer; transition: 0.3s; }
+.toggle .slider::before { content: ''; position: absolute; height: 22px; width: 22px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s; }
+.toggle input:checked + .slider { background: #6366f1; }
+.toggle input:checked + .slider::before { transform: translateX(24px); }
+.btn { padding: 12px 24px; border-radius: 12px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; }
+.btn-primary { background: #6366f1; color: #fff; }
+.btn-primary:hover { background: #4f46e5; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary { background: #fff; color: #475569; border: 1px solid #e2e8f0; }
+.btn-sm { padding: 6px 14px; font-size: 13px; width: auto; }
+.user-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; margin-bottom: 12px; }
+.user-info { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; }
+.user-info img { width: 28px; height: 28px; border-radius: 50%; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: #fff; padding: 12px 24px; border-radius: 12px; font-size: 14px; display: none; z-index: 100; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+.toast.show { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+.loading { text-align: center; padding: 60px; color: #94a3b8; }
+.nav-links { display: flex; gap: 8px; margin-bottom: 16px; }
+.nav-links a { padding: 8px 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; color: #475569; text-decoration: none; font-size: 14px; }
+.nav-links a:hover { border-color: #6366f1; color: #6366f1; }
+.guide { margin-bottom: 16px; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+.guide-title { padding: 12px 16px; font-size: 14px; font-weight: 600; color: #6366f1; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+.guide-title:hover { background: #eef2ff; }
+.guide-arrow { font-size: 10px; transition: transform 0.2s; }
+.guide.open .guide-arrow { transform: rotate(90deg); }
+.guide-content { display: none; padding: 16px; font-size: 13px; line-height: 1.8; color: #475569; border-top: 1px solid #e2e8f0; }
+.guide.open .guide-content { display: block; }
+.guide-content ol { padding-left: 20px; }
+.guide-content ol li { margin-bottom: 6px; }
+.guide-content ul { padding-left: 18px; margin: 4px 0; }
+.guide-content ul li { margin-bottom: 2px; list-style: disc; }
+.guide-content a { color: #6366f1; }
+.guide-content code { background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+.guide-note { margin-top: 10px; padding: 8px 12px; background: #fffbeb; border-radius: 6px; color: #92400e; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="login-screen" style="display:flex; justify-content:center; align-items:center; height:100vh;">
+  <div style="text-align:center; max-width: 360px;">
+    <h1 style="font-size:24px; margin-bottom:8px; color:#6366f1;">投資 Agent 設定</h1>
+    <p style="color:#475569; margin-bottom:24px; font-size:14px; line-height:1.6;">
+      設定 LINE 通知、Trello Focus Board、停損規則。<br>
+      用 Google 帳號登入後即可開始。
+    </p>
+    <div id="g-signin-btn"></div>
+    <div id="login-error" style="color:#dc2626; margin-top:12px; font-size:13px;"></div>
+    <div style="margin-top:24px;">
+      <a href="/" style="color:#6366f1; font-size:14px;">← 返回 Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="app" style="display:none;">
+
+<div class="user-bar">
+  <div class="user-info">
+    <img id="user-avatar" src="" alt="">
+    <span id="user-name"></span>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a href="/" class="btn btn-secondary btn-sm" style="text-decoration:none">Dashboard</a>
+    <button class="btn btn-secondary btn-sm" onclick="signOut()">登出</button>
+  </div>
+</div>
+
+<div class="header">
+  <h1>投資 Agent 設定</h1>
+  <div class="sub">每日自動掃描持倉，推送 LINE 通知 + 管理 Trello Focus Board</div>
+</div>
+
+<div id="loading" class="loading">載入設定中...</div>
+
+<div id="settings-form" style="display:none;">
+
+  <!-- Spreadsheet -->
+  <div class="card">
+    <div class="card-title">Google Sheets 連結</div>
+    <div class="guide">
+      <div class="guide-title" onclick="this.parentElement.classList.toggle('open')">如何找到 Spreadsheet ID？ <span class="guide-arrow">▶</span></div>
+      <div class="guide-content">
+        <ol>
+          <li>打開你的持倉 Google Sheet</li>
+          <li>網址格式為 <code>https://docs.google.com/spreadsheets/d/<strong>1aBcDeFgHiJkLmNoPqRsTuVwXyZ</strong>/edit</code></li>
+          <li>粗體部分（/d/ 和 /edit 之間）就是 Spreadsheet ID</li>
+          <li>確保 Service Account 有此 Sheet 的檢視權限：
+            <ul>
+              <li>在 Sheet 右上角「共用」→ 加入 Service Account email → 設為「檢視者」</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Spreadsheet ID</label>
+      <input type="text" id="spreadsheet_id" placeholder="1abc...xyz">
+    </div>
+  </div>
+
+  <!-- LINE -->
+  <div class="card">
+    <div class="card-title">LINE 通知設定</div>
+    <div class="guide">
+      <div class="guide-title" onclick="this.parentElement.classList.toggle('open')">如何申請 LINE Bot？ <span class="guide-arrow">▶</span></div>
+      <div class="guide-content">
+        <ol>
+          <li>前往 <a href="https://developers.line.biz/console/" target="_blank">LINE Developers Console</a>，用你的 LINE 帳號登入</li>
+          <li>建立一個 <strong>Provider</strong>（例如「投資助手」）</li>
+          <li>在 Provider 下建立 <strong>Messaging API Channel</strong>
+            <ul>
+              <li>Channel name: 任意（例如「投資 Agent」）</li>
+              <li>Channel description: 任意</li>
+            </ul>
+          </li>
+          <li>進入 Channel 設定頁：
+            <ul>
+              <li><strong>Messaging API</strong> 分頁 → 最下方 <strong>Channel access token</strong> → 點「Issue」產生 token → 複製貼到下方</li>
+              <li><strong>Basic settings</strong> 分頁 → <strong>Your user ID</strong>（U 開頭）→ 複製貼到下方</li>
+            </ul>
+          </li>
+          <li>用手機 LINE 掃描 Channel 的 QR Code <strong>加 Bot 為好友</strong>（否則 Bot 無法推播給你）</li>
+        </ol>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Channel Access Token</label>
+      <input type="password" id="line_channel_token" placeholder="Bearer token">
+      <div class="hint">Messaging API 分頁 → Channel access token（長字串）</div>
+    </div>
+    <div class="form-group">
+      <label>User ID</label>
+      <input type="text" id="line_user_id" placeholder="U...">
+      <div class="hint">Basic settings 分頁 → Your user ID（U 開頭，不是 Bot 的 ID）</div>
+    </div>
+  </div>
+
+  <!-- Trello -->
+  <div class="card">
+    <div class="card-title">Trello Focus Board</div>
+    <div class="guide">
+      <div class="guide-title" onclick="this.parentElement.classList.toggle('open')">如何取得 Trello API Key 和 Token？ <span class="guide-arrow">▶</span></div>
+      <div class="guide-content">
+        <ol>
+          <li>登入 Trello，前往 <a href="https://trello.com/power-ups/admin" target="_blank">Power-Ups Admin</a></li>
+          <li>點「New」建立一個 Power-Up（名稱任意，例如「投資 Agent」）</li>
+          <li>建立後進入該 Power-Up → 左側選 <strong>API Key</strong> → 複製 API Key</li>
+          <li>在同一頁面，點擊 API Key 右側的 <strong>Token</strong> 連結 → 授權 → 複製產生的 Token</li>
+          <li>建立或選擇一個 Trello Board 作為 Focus Board</li>
+          <li>Board ID 的取得方式：
+            <ul>
+              <li>打開 Board → 網址格式為 <code>https://trello.com/b/<strong>aBcDeFg</strong>/board-name</code></li>
+              <li>粗體部分就是 Board ID</li>
+            </ul>
+          </li>
+        </ol>
+        <div class="guide-note">Agent 會自動在 Board 上建立「本週投資」list，並在上面建立/刪除卡片。</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>API Key</label>
+      <input type="password" id="trello_api_key" placeholder="Trello API Key">
+    </div>
+    <div class="form-group">
+      <label>Token</label>
+      <input type="password" id="trello_token" placeholder="Trello Token">
+    </div>
+    <div class="form-group">
+      <label>Board ID</label>
+      <input type="text" id="trello_board_id" placeholder="aBcDeFg">
+      <div class="hint">Trello Board URL 中 /b/ 後面那段短碼</div>
+    </div>
+  </div>
+
+  <!-- Stop Loss -->
+  <div class="card">
+    <div class="card-title">停損規則</div>
+    <div class="form-group">
+      <label>投機停損 %</label>
+      <div class="slider-group">
+        <input type="range" id="stop_loss_spec" min="-30" max="0" step="1" value="-10" oninput="document.getElementById('spec-val').textContent=this.value+'%'">
+        <span class="slider-val" id="spec-val">-10%</span>
+      </div>
+      <div class="hint">投機股（短期交易）的停損門檻，建議 -10%</div>
+    </div>
+    <div class="form-group">
+      <label>投資停損 %</label>
+      <div class="slider-group">
+        <input type="range" id="stop_loss_invest" min="-40" max="0" step="1" value="-20" oninput="document.getElementById('invest-val').textContent=this.value+'%'">
+        <span class="slider-val" id="invest-val">-20%</span>
+      </div>
+      <div class="hint">投資股（長期持有）的停損門檻，建議 -20%</div>
+    </div>
+  </div>
+
+  <!-- CC Pipeline + Spec Tickers -->
+  <div class="card">
+    <div class="card-title">標的清單</div>
+    <div class="form-group">
+      <label>Covered Call Pipeline</label>
+      <input type="text" id="cc_pipeline" placeholder="CCJ,GOOG,TSM,MU,NVDA,AMD">
+      <div class="hint">用逗號分隔。每週五自動檢查這些標的，沒有 open call 的會提醒寫入。</div>
+    </div>
+    <div class="form-group">
+      <label>投機股清單</label>
+      <input type="text" id="spec_tickers" placeholder="HIMS,GRAB,POOL">
+      <div class="hint">用逗號分隔。不在此清單的持倉視為「投資」，適用較寬的停損門檻。</div>
+    </div>
+  </div>
+
+  <!-- Active Toggle -->
+  <div class="card">
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">啟用 Agent</div>
+        <div class="toggle-sub">開啟後每日/每週自動掃描 + 通知</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="active">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Save -->
+  <button class="btn btn-primary" id="save-btn" onclick="saveSettings()">儲存設定</button>
+  <div style="height:40px"></div>
+</div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_BASE = '';
+let idToken = '';
+let userEmail = '';
+
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function signOut() {
+  idToken = '';
+  userEmail = '';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  google.accounts.id.disableAutoSelect();
+}
+
+async function onSignIn(response) {
+  idToken = response.credential;
+  const payload = JSON.parse(atob(idToken.split('.')[1]));
+  userEmail = payload.email;
+  document.getElementById('user-name').textContent = payload.name || payload.email;
+  document.getElementById('user-avatar').src = payload.picture || '';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  await loadSettings();
+}
+
+async function loadSettings() {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('settings-form').style.display = 'none';
+  try {
+    const resp = await fetch(`${API_BASE}/api/invest/settings`, {
+      headers: { 'Authorization': `Bearer ${idToken}` }
+    });
+    if (!resp.ok) throw new Error('Failed to load settings');
+    const data = await resp.json();
+    if (data.exists) {
+      fillForm(data.settings);
+    } else {
+      fillForm(data.defaults);
+    }
+  } catch (e) {
+    showToast('載入失敗: ' + e.message, 4000);
+  }
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('settings-form').style.display = 'block';
+}
+
+function fillForm(s) {
+  const fields = ['spreadsheet_id', 'line_channel_token', 'line_user_id',
+    'trello_api_key', 'trello_token', 'trello_board_id',
+    'cc_pipeline', 'spec_tickers'];
+  fields.forEach(f => {
+    const el = document.getElementById(f);
+    if (el) el.value = s[f] || '';
+  });
+  const specSlider = document.getElementById('stop_loss_spec');
+  const investSlider = document.getElementById('stop_loss_invest');
+  specSlider.value = parseInt(s.stop_loss_spec) || -10;
+  investSlider.value = parseInt(s.stop_loss_invest) || -20;
+  document.getElementById('spec-val').textContent = specSlider.value + '%';
+  document.getElementById('invest-val').textContent = investSlider.value + '%';
+  document.getElementById('active').checked = (s.active || '').toLowerCase() === 'true';
+}
+
+async function saveSettings() {
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.textContent = '儲存中...';
+  try {
+    const body = {
+      spreadsheet_id: document.getElementById('spreadsheet_id').value.trim(),
+      line_channel_token: document.getElementById('line_channel_token').value.trim(),
+      line_user_id: document.getElementById('line_user_id').value.trim(),
+      trello_api_key: document.getElementById('trello_api_key').value.trim(),
+      trello_token: document.getElementById('trello_token').value.trim(),
+      trello_board_id: document.getElementById('trello_board_id').value.trim(),
+      stop_loss_spec: document.getElementById('stop_loss_spec').value,
+      stop_loss_invest: document.getElementById('stop_loss_invest').value,
+      cc_pipeline: document.getElementById('cc_pipeline').value.trim(),
+      spec_tickers: document.getElementById('spec_tickers').value.trim(),
+      active: document.getElementById('active').checked ? 'true' : 'false',
+    };
+    const resp = await fetch(`${API_BASE}/api/invest/settings`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!resp.ok) throw new Error('Save failed');
+    const data = await resp.json();
+    showToast(data.status === 'created' ? '設定已建立' : '設定已更新');
+  } catch (e) {
+    showToast('儲存失敗: ' + e.message, 4000);
+  }
+  btn.disabled = false;
+  btn.textContent = '儲存設定';
+}
+
+// Init Google Sign-In
+window.addEventListener('load', async () => {
+  try {
+    const resp = await fetch(`${API_BASE}/api/config`);
+    const cfg = await resp.json();
+    google.accounts.id.initialize({
+      client_id: cfg.google_client_id,
+      callback: onSignIn,
+      auto_select: true,
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('g-signin-btn'),
+      { theme: 'outline', size: 'large', width: 300, text: 'signin_with' }
+    );
+  } catch (e) {
+    document.getElementById('login-error').textContent = 'Google Sign-In 初始化失敗';
+  }
+});
+</script>
+</body>
+</html>

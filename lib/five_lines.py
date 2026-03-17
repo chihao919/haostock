@@ -1,7 +1,7 @@
 """Happy Five Lines (樂活五線譜) analysis using linear regression ± standard deviation."""
 
 import httpx
-import numpy as np
+import math
 from datetime import datetime, timedelta
 
 
@@ -61,16 +61,23 @@ def calculate_five_lines(prices: list[dict]) -> dict:
     if len(prices) < 30:
         raise ValueError("Not enough data points (need at least 30)")
 
-    closes = np.array([p["close"] for p in prices])
-    x = np.arange(len(closes))
+    closes = [p["close"] for p in prices]
+    n = len(closes)
+    x = list(range(n))
 
-    # Linear regression
-    coeffs = np.polyfit(x, closes, 1)
-    regression = np.polyval(coeffs, x)
+    # Linear regression (least squares y = a*x + b)
+    sum_x = sum(x)
+    sum_y = sum(closes)
+    sum_xy = sum(xi * yi for xi, yi in zip(x, closes))
+    sum_x2 = sum(xi * xi for xi in x)
+    a = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x * sum_x)
+    b = (sum_y - a * sum_x) / n
+    regression = [a * xi + b for xi in x]
 
     # Standard deviation of residuals
-    residuals = closes - regression
-    sigma = np.std(residuals)
+    residuals = [c - r for c, r in zip(closes, regression)]
+    mean_res = sum(residuals) / n
+    sigma = math.sqrt(sum((r - mean_res) ** 2 for r in residuals) / n)
 
     # Current regression value (last point)
     reg_now = regression[-1]
@@ -107,7 +114,7 @@ def calculate_five_lines(prices: list[dict]) -> dict:
         "position": position,
         "signal": signal,
         "sigma": round(sigma, 2),
-        "slope_daily": round(coeffs[0], 4),
+        "slope_daily": round(a, 4),
         "data_period": f"{prices[0]['date']} ~ {prices[-1]['date']}",
         "data_points": len(prices),
         "history": history,

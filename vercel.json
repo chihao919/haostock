@@ -18,9 +18,20 @@
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/fivelines", "destination": "/api" },
     { "source": "/portfolio", "destination": "/api" },
+    { "source": "/settings", "destination": "/api" },
+    { "source": "/guide", "destination": "/api" },
     { "source": "/privacy", "destination": "/api" },
     { "source": "/terms", "destination": "/api" },
     { "source": "/static/:path*", "destination": "/api" },
     { "source": "/", "destination": "/api" }
+  ],
+  "crons": [
+    { "path": "/api/cron/invest-daily", "schedule": "0 0 * * 1-5" },
+    { "path": "/api/cron/invest-weekly", "schedule": "30 13 * * 5" },
+    { "path": "/api/cron/sbl-notify", "schedule": "30 1 * * 1-5" },
+    { "path": "/api/cron/sbl-notify", "schedule": "30 2 * * 1-5" },
+    { "path": "/api/cron/sbl-notify", "schedule": "0 3 * * 1-5" },
+    { "path": "/api/cron/sbl-notify", "schedule": "30 3 * * 1-5" },
+    { "path": "/api/cron/sbl-notify", "schedule": "0 4 * * 1-5" }
   ]
 }

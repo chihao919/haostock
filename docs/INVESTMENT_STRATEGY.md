@@ -1,6 +1,6 @@
 # Investment Strategy — 2026-2028
 
-## Portfolio Snapshot (2026-03-07)
+## Portfolio Snapshot (2026-03-12)
 
 | Category | Value | % of Assets |
 |----------|-------|-------------|
@@ -21,10 +21,11 @@ Loan monthly payments: $3,131 (99,657 TWD)
 
 1. **Bonds = untouchable** — Core income, covers loan payments. Do not sell or rebalance.
 2. **ETFs for compounding** — 0050, VOO, VTI, QQQ as long-term DCA base.
-3. **Covered calls for income** — On stocks held in Firstrade & TW_Brokerage (options-enabled accounts).
+3. **Covered calls for income** — Weekly calls on all 100+ share positions.
 4. **Sell puts to enter** — Use screened stocks as sell-put targets. Get paid to wait.
 5. **Gradual cleanup** — Trim losing positions, redeploy into quality.
 6. **Stop-loss discipline** — 投機 -10%, 投資 -20%, no exceptions.
+7. **Tax optimization** — All covered call income in TW-opened overseas accounts (Firstrade_TW, IBKR_TW). Stay under 海外所得 750 萬 TWD threshold.
 
 ---
 
@@ -43,37 +44,155 @@ Loan monthly payments: $3,131 (99,657 TWD)
 ### Current Stop-Loss Violations (action needed)
 | Ticker | Account | P&L | Category | Action |
 |--------|---------|-----|----------|--------|
-| POOL | Firstrade | -45% | 投資 | **EXIT NOW** — sell immediately |
-| HIMS | TW_Brokerage | -68% | 投機 | **EXIT NOW** — let covered call expire 3/21, then sell |
-| GRAB | TW_Brokerage | -35% | 投機 | **EXIT NOW** — sell immediately ($398 position) |
-| 1301 台塑 | Yongfeng_B | -35% | 投資 | **EXIT** — sell all 4000 shares |
-| 1301 台塑 | Yongfeng_A | -50% | 投資 | **EXIT** — sell all 1000 shares |
-| 2002 中鋼 | Yongfeng_B | -44% | 投資 | **EXIT** — sell all 4000 shares |
-| 2012 春雨 | Yongfeng_B | -36% | 投機 | **EXIT** — sell all 2000 shares |
-| 8499 鼎炫 | Yongfeng_B | -16% | 投機 | **EXIT** — sell 73 shares |
-| SHOP | Firstrade | -11% | 投機 | **WATCH** — let covered call expire 3/21, reassess |
-| MSFT | IBKR | -16% | 投資 | **WATCH** — approaching -20%, review at $390 |
+| POOL | Firstrade_US | -46% | 投資 | **EXIT NOW** — sell immediately |
+| HIMS | Firstrade_TW | -47% | 投機 | **EXIT NOW** — let $20 call be assigned 3/21 |
+| GRAB | Firstrade_TW | -37% | 投機 | **EXIT NOW** — sell immediately ($390 position) |
+| 1301 台塑 | Yongfeng_B (4000sh) | -39% | 投資 | **EXIT** — sell all |
+| 1301 台塑 | Yongfeng_A (1000sh) | -53% | 投資 | **EXIT** — sell all |
+| 2002 中鋼 | Yongfeng_B (4000sh) | -45% | 投資 | **EXIT** — sell all |
+| 2012 春雨 | Yongfeng_B (2000sh) | -36% | 投機 | **EXIT** — sell all |
+| 8499 鼎炫 | Yongfeng_B (73sh) | -16% | 投機 | **EXIT** — sell all |
+| SHOP | Firstrade_US | -12% | 投機 | **EXIT** — sell after 3/21 call expires |
+| MSFT | IBKR_TW | -17% | 投資 | **WATCH** — approaching -20%, review at $390 |
 
 ---
 
-## Account Roles
+## Account Roles & Tax Strategy
 
-| Account | Can Trade Options? | Role |
-|---------|-------------------|------|
-| **Firstrade** ($138K) | YES | Active: Covered calls + Sell puts |
-| **TW_Brokerage** ($131K) | YES | Active: Covered calls + Sell puts |
-| **IBKR** ($26K) | YES | Growth: ETF DCA + small positions |
-| **Cathay_US** ($78K) | NO (sub-custody) | Passive: ETF hold only, gradual transfer out |
-| **Yongfeng_B** (1,446萬) | NO | TW stocks: Hold winners, trim losers |
-| **Yongfeng_A** (388萬) | NO | TW stocks: 0050 + 聯發科 core |
-| **Cathay_TW** (465萬) | NO | TW stocks: 台積電 + ETF core |
+| Account | Can Trade Options? | Role | Tax Treatment |
+|---------|-------------------|------|---------------|
+| **Firstrade_US** ($138K) | YES | Active: Covered calls + Sell puts | US-based, 1099 reporting |
+| **Firstrade_TW** ($131K) | YES | Active: Covered calls + Sell puts | **海外所得，免稅** (< 750萬) |
+| **IBKR_TW** ($26K) | YES | Growth: Covered calls after migration | **海外所得，免稅** (< 750萬) |
+| **Cathay_US** ($78K) | NO (複委託) | Passive: Gradually transfer out | 複委託自動申報 |
+| **Yongfeng_B** (1,446萬) | NO | TW stocks: Hold winners, trim losers | 台股免證所稅 |
+| **Yongfeng_A** (388萬) | NO | TW stocks: 0050 + 聯發科 core | 台股免證所稅 |
+| **Cathay_TW** (465萬) | NO | TW stocks: 台積電 + ETF core | 台股免證所稅 |
 
-### Cathay_US Migration Plan
-- Sub-custody = no options = wasted covered call potential
-- Priority: Move AMD (46sh, +40%), NVDA (75sh, +49%), MSFT (23sh) to Firstrade/IBKR
-- AMD + NVDA combined = $22K, enough for covered calls after transfer
-- Keep BND ($6.7K) and BRK-B ($20.7K) in Cathay (no options needed)
-- VOO ($10.9K) can stay — no covered calls needed on ETF
+### Cathay_US (複委託) Migration Plan
+
+Sub-custody = no options = wasted covered call potential. Transfer to IBKR_TW for options.
+
+| Stock | Shares | Current Value | Action |
+|-------|--------|--------------|--------|
+| **NVDA** | 75.3 | ~$14.1K | → IBKR_TW (merge with 27sh = 102sh, sell 1 call) |
+| **AMD** | 45.8 | ~$9.5K | → IBKR_TW (merge with 21sh = 67sh, buy 33 more) |
+| MSFT | 22.6 | ~$9.1K | → IBKR_TW (merge with 5sh = 28sh, too far from 100) |
+| BRK-B | 41.5 | ~$20.4K | Stay — no options needed |
+| VOO | 17.6 | ~$10.9K | Stay — ETF, no options needed |
+| VTI | 15.3 | ~$5.1K | Stay — ETF |
+| QQQ | 3.4 | ~$2.1K | Stay — ETF |
+| BND | 90.3 | ~$6.7K | Stay — bond ETF |
+| TSLA | 2.4 | ~$1.0K | Sell — tiny position |
+
+**Migration priority: NVDA first (immediately 100+ shares), then AMD (need to buy 33 more).**
+
+---
+
+## Covered Call Strategy — Weekly Selling
+
+### Philosophy
+- **All positions with 100+ shares sell weekly covered calls**
+- Sell every Friday evening (Taiwan time 21:30) for next Friday expiry
+- Strike = current price + 5~8% OTM
+- If assigned, sell put to re-enter
+- Close at 75%+ profit mid-week if opportunity arises
+
+### Weekly SOP (每週五晚上 9:30)
+```
+1. Confirm all expiring calls expired OTM ✅
+2. CCJ  × 7 calls → current price + 5~8%
+3. GOOG × 3 calls → current price + 5~7%
+4. MU   × 1 call  → current price + 5~8%
+5. TSM  × 1 call  → current price + 5~7%
+6. NVDA × 1 call  → current price + 5~7% (after migration)
+7. AMD  × 1 call  → current price + 5~7% (after accumulation to 100sh)
+Total: ~15 minutes
+```
+
+### Covered Call Income Projection
+
+| Ticker | Shares | Account | Calls/wk | Est. Weekly | Est. Monthly |
+|--------|--------|---------|----------|-------------|-------------|
+| CCJ | 700 | Firstrade_US + TW | 7 | $210-420 | $840-1,680 |
+| GOOG | 300 | Firstrade_US + TW | 3 | $150-300 | $600-1,200 |
+| MU | 100 | Firstrade_US | 1 | $75-125 | $300-500 |
+| TSM | 100 | Firstrade_TW | 1 | $60-100 | $240-400 |
+| NVDA | 102 | IBKR_TW (after migration) | 1 | $75-125 | $300-500 |
+| AMD | 100 | IBKR_TW (after accumulation) | 1 | $50-100 | $200-400 |
+| **Total** | | | **14** | **$620-1,170** | **$2,480-4,680** |
+
+**Conservative estimate: $2,500/month from covered calls alone.**
+
+---
+
+## Options Strategy — Sell Put → Covered Call Pipeline
+
+### Step 1: Sell Puts on Quality Stocks
+```
+Screened stock (4/4) → Sell put (ATM or 5-10% OTM, 30-45 DTE)
+→ Collect premium while waiting
+→ If assigned: own quality stock at discount → start selling covered calls
+→ If expires: repeat, accumulate premium
+```
+
+### Active Options Positions (2026-03-12)
+| Account | Ticker | Expiry | Strike | Type | Qty | Status |
+|---------|--------|--------|--------|------|-----|--------|
+| Firstrade_US | CCJ | 3/13 | $110 | Put | -1 | OTM $9.5 → expires tomorrow ✅ |
+| Firstrade_US | GOOG | 3/21 | $330 | Call | -1 | OTM $20 → will expire ✅ |
+| Firstrade_US | SHOP | 3/21 | $150 | Call | -1 | OTM $21 → will expire ✅ |
+| Firstrade_US | CCJ | 3/21 | $140 | Call | -1 | OTM $20.5 → will expire ✅ |
+| Firstrade_TW | TSM | 3/21 | $400 | Call | -1 | OTM $44 → will expire ✅ |
+| Firstrade_TW | MU | 3/21 | $310 | Put | -1 | OTM $107 → will expire ✅ |
+| Firstrade_TW | HIMS | 3/21 | $20 | Call | -1 | **ITM $5.9** → let assign, exit HIMS |
+| Firstrade_TW | CCJ | 3/27 | $145 | Call | -2 | OTM $25.5 → will expire ✅ |
+| Firstrade_US | MU | 4/2 | $440 | Call | -1 | OTM $22.5 → hold |
+| Firstrade_TW | AMZN | 4/2 | $190 | Put | -1 | OTM $24.6 → hold |
+| Firstrade_US | ONDS | 4/2 | $8 | Put | -1 | hold |
+| Firstrade_US | CCJ | 4/17 | $115 | Put | -1 | **OTM only $4.5** ⚠️ watch closely |
+
+### Next Sell Put Candidates (after cleanup frees capital)
+| Ticker | Target Strike | Capital Needed | Account |
+|--------|--------------|----------------|---------|
+| V | ~$310 (5% OTM) | ~$31K | Firstrade_TW |
+| MA | ~$540 (5% OTM) | ~$54K | Firstrade_TW |
+| AAPL | ~$220 (5% OTM) | ~$22K | Firstrade_TW |
+| META | ~$600 (5% OTM) | ~$60K | Firstrade_TW |
+
+**Note: Prioritize sell puts in Firstrade_TW for tax optimization.**
+
+---
+
+## Position Cleanup — Execution Plan
+
+### Phase 1: This Week (2026-03-12~14)
+1. **Sell POOL** (Firstrade_US) — market order, $2.1K → buy VOO
+2. **Sell GRAB** (Firstrade_TW) — market order, $390 → sell put capital
+3. **Sell 2012 春雨** (Yongfeng_B) — 2000 shares → buy 0050
+4. **Sell 8499 鼎炫** (Yongfeng_B) — 73 shares → buy 0050
+5. **Sell 2002 中鋼** (Yongfeng_B) — 4000 shares → buy 0050
+
+### Phase 2: After 3/21 Options Expiry
+6. **HIMS** — $20 call assigned, shares called away at $20, done
+7. **Sell SHOP** (Firstrade_US) — exit after call expires
+8. **Sell 1301 台塑** — Yongfeng_B 4000sh + Yongfeng_A 1000sh → buy 0050
+
+### Phase 3: Cathay_US Migration (March-April 2026)
+9. **Transfer NVDA 75sh** → IBKR_TW (combine with 27sh = 102sh → sell call)
+10. **Transfer AMD 46sh** → IBKR_TW (combine with 21sh = 67sh)
+11. **Buy AMD 33sh** in IBKR_TW (total 100sh → sell call)
+12. **Transfer MSFT 23sh** → IBKR_TW (combine with 5sh = 28sh, long-term hold)
+13. Sell TSLA 2.4sh (tiny position)
+
+### Redeployment Summary
+| From | Amount | To | Account |
+|------|--------|----|---------|
+| POOL | $2.1K | VOO | Firstrade_US |
+| GRAB + HIMS | ~$2.4K | Sell put capital | Firstrade_TW |
+| SHOP | ~$12.9K | Sell put capital | Firstrade_US |
+| 中鋼+春雨+鼎炫+台塑 | ~$443K TWD (~$14K) | 0050 DCA | Yongfeng_B/A |
+| Cathay NVDA+AMD+MSFT | ~$32.7K | Covered call base | IBKR_TW |
 
 ---
 
@@ -99,7 +218,7 @@ From `stock_screen.py --us` results. These are sell-put and accumulation targets
 | TSM | Tech | Foundry monopoly, already own + doing covered calls |
 | CCJ | Energy | Uranium thesis, already own + doing covered calls |
 | MU | Tech | Memory cycle play, already own + doing covered calls |
-| AMD | Tech | Already own in Cathay_US, migrate for options |
+| AMD | Tech | Migrating from Cathay_US, accumulate to 100sh |
 
 ### Tier 3 — Watchlist (accumulate on dips)
 | Ticker | Sector | Why |
@@ -112,107 +231,36 @@ From `stock_screen.py --us` results. These are sell-put and accumulation targets
 
 ---
 
-## Options Strategy — Sell Put → Covered Call Pipeline
-
-### Step 1: Sell Puts on Quality Stocks
-```
-Screened stock (4/4) → Sell put (ATM or 5-10% OTM, 30-45 DTE)
-→ Collect premium while waiting
-→ If assigned: own quality stock at discount
-→ If expires: repeat, accumulate premium
-```
-
-### Current Sell Put Targets
-| Ticker | Account | Strike | DTE | Status |
-|--------|---------|--------|-----|--------|
-| AMZN | TW_Brokerage | $190 | 26d | Active (OTM $23) |
-| CCJ | Firstrade | $110 | 6d | Active (ITM $0.3!) — may be assigned |
-| CCJ | Firstrade | $115 | 41d | Active (ITM $5.3) — monitor |
-
-### Next Sell Put Candidates (after cleanup frees capital)
-| Ticker | Target Strike | Capital Needed | Account |
-|--------|--------------|----------------|---------|
-| V | ~$310 (5% OTM) | ~$31K | Firstrade (after POOL exit frees $2.1K) |
-| MA | ~$540 (5% OTM) | ~$54K | TW_Brokerage (after HIMS/GRAB exit) |
-| META | ~$600 (5% OTM) | ~$60K | Firstrade (needs capital) |
-| AAPL | ~$220 (5% OTM) | ~$22K | TW_Brokerage |
-
-### Step 2: Covered Calls on Holdings
-```
-Own 100+ shares → Sell covered call (15-20% OTM, 30-45 DTE)
-→ Roll if ITM at 7 DTE
-→ Close at 75%+ profit
-→ Monthly income target: $500-1000/month
-```
-
-### Active Covered Calls
-| Ticker | Account | Strike | DTE | Status |
-|--------|---------|--------|-----|--------|
-| TSM | TW_Brokerage | $400 | 14d | OTM $61 — will expire worthless |
-| GOOG | Firstrade | $330 | 14d | OTM $32 — will expire worthless |
-| SHOP | Firstrade | $150 | 14d | OTM $20 — will expire worthless |
-| CCJ | TW_Brokerage | $145 | 20d | OTM $35 — will expire worthless |
-| CCJ | Firstrade | $140 | 14d | OTM $30 — will expire worthless |
-| MU | Firstrade | $440 | 26d | OTM $70 — will expire worthless |
-| HIMS | TW_Brokerage | $20 | 14d | OTM $4 — last call before exit |
-
-### Covered Call Pipeline (after cleanup + migration)
-| Ticker | Shares | Account | Monthly Premium Est. |
-|--------|--------|---------|---------------------|
-| CCJ | 700 | Firstrade + TW_Brokerage | ~$400-600 |
-| GOOG | 200 | Firstrade | ~$300-500 |
-| TSM | 100 | TW_Brokerage | ~$200-400 |
-| MU | 100 | Firstrade | ~$200-400 |
-| AMD | 100 | After migration from Cathay_US | ~$200-300 |
-| NVDA | 75→100 | After migration + accumulate | ~$300-500 |
-
-**Estimated monthly covered call income: $1,500-2,700**
-
----
-
-## Position Cleanup — Immediate Actions
-
-### Week of 2026-03-10 (Priority)
-1. **Sell POOL** (Firstrade) — market order, redeploy $2.1K into VOO
-2. **Sell GRAB** (TW_Brokerage) — market order, $398 → add to AMZN put capital
-3. **Sell 2012 春雨** (Yongfeng_B) — market order, redeploy $33.5K TWD into 0050
-4. **Sell 8499 鼎炫** (Yongfeng_B) — market order, $19.4K TWD into 0050
-5. **Sell 2002 中鋼** (Yongfeng_B) — market order, $79.6K TWD into 0050
-
-### Week of 2026-03-17 (After options expire 3/21)
-6. **Sell HIMS** (TW_Brokerage) — after HIMS $20 call expires 3/21
-7. **Reassess SHOP** (Firstrade) — if still -10%+, exit after call expires
-
-### March 2026
-8. **Sell 1301 台塑** (Yongfeng_B, 4000sh + Yongfeng_A, 1000sh) — redeploy $251K TWD into 0050
-
-### Redeployment Summary
-| From | Amount | To | Account |
-|------|--------|----|---------|
-| POOL | $2.1K | VOO | Firstrade |
-| GRAB + HIMS | $2.0K | Sell put capital | TW_Brokerage |
-| 中鋼+春雨+鼎炫+台塑 | ~$443K TWD (~$14K) | 0050 DCA | Yongfeng_B/A |
-
----
-
 ## Hold & Grow (core positions)
 
 | Ticker | Account | P&L | Strategy |
 |--------|---------|-----|----------|
-| 2330 台積電 | Yongfeng_B (5000sh) + Cathay_TW (2023sh) | +98~121% | Core hold. TSM ADR covered calls |
+| 2330 台積電 | Yongfeng_B (5000sh) + Cathay_TW (2023sh) | +127% | Core hold. TSM ADR covered calls |
 | 2454 聯發科 | Yongfeng_A (1000sh) | +122% | Core hold |
 | 0050 | All TW (44,857sh) | +25~75% | Core ETF, DCA monthly + redeployment |
-| 006208 | Cathay_TW (2,898sh) | +90% | Core ETF |
-| 2317 鴻海 | Yongfeng_B (8,406sh) | +11% | Hold, AI server growth thesis |
+| 006208 | Cathay_TW (2,898sh) | +93% | Core ETF |
+| 2317 鴻海 | Yongfeng_B (8,406sh) | +9% | Hold, AI server growth thesis |
 | 1303 南亞 | Yongfeng_B (7,161sh) | +25% | Hold, cyclical recovery |
-| CCJ | Firstrade + TW_Brokerage (700sh) | +19~24% | Covered calls + sell puts |
-| GOOG | Firstrade + TW_Brokerage (300sh) | -3~23% | Covered calls, long-term hold |
-| MU | Firstrade (100sh) | 0% | Covered calls |
-| TSM | TW_Brokerage (100sh) | +14% | Covered calls |
-| NVDA | Cathay_US (75sh) + IBKR (27sh) | -4~49% | Migrate to options account |
-| AMD | Cathay_US (46sh) + IBKR (21sh) | -15~40% | Migrate, accumulate to 100sh |
-| BRK-B | Cathay_US (41sh) + IBKR (9sh) | 0~9% | Long-term hold, no options needed |
-| VOO/VTI/QQQ | Multiple | -4~13% | Core ETF, DCA monthly |
+| CCJ | Firstrade_US + Firstrade_TW (700sh) | +29~35% | Weekly covered calls |
+| GOOG | Firstrade_US + Firstrade_TW (300sh) | +1~28% | Weekly covered calls |
+| MU | Firstrade_US (100sh) | +13% | Weekly covered calls |
+| TSM | Firstrade_TW (100sh) | +20% | Weekly covered calls |
+| NVDA | IBKR_TW (102sh after migration) | +57% | Weekly covered calls |
+| AMD | IBKR_TW (100sh after migration + buy) | +50% | Weekly covered calls |
+| BRK-B | Cathay_US (41sh) + IBKR_TW (9sh) | +7% | Long-term hold, no options needed |
+| VOO/VTI/QQQ | Multiple | -1~14% | Core ETF, DCA monthly |
+
+---
+
+## Passive Income Summary (target state)
+
+| Source | Monthly Income | Tax |
+|--------|---------------|-----|
+| Bond interest (net) | $6,909 | 24% already withheld |
+| Covered calls (14 contracts/week) | $2,500-4,700 | **Free** (海外所得 < 750萬) |
+| **Total** | **$9,400-11,600/month** | |
+| Loan payments | -$3,131 | |
+| **Net passive income** | **$6,300-8,500/month** | |
 
 ---
 
@@ -230,7 +278,7 @@ Own 100+ shares → Sell covered call (15-20% OTM, 30-45 DTE)
 
 ## Rebalance Schedule
 
-- **Weekly**: Review options positions, roll/close as needed. Check stop-losses.
+- **Weekly (Friday 21:30 TW time)**: Sell covered calls on all positions. Check stop-losses.
 - **Monthly**: DCA into ETFs (VOO, 0050), run `stock_screen.py`, sell new puts
 - **Quarterly**: Review allocation %, trim losers, adjust targets, re-screen
 
@@ -241,6 +289,7 @@ Own 100+ shares → Sell covered call (15-20% OTM, 30-45 DTE)
 - `python3 scripts/stock_screen.py --us` — S&P 500 fundamental screen
 - `python3 scripts/stock_screen.py --tw` — TW stocks (Huang Kuo-Hua method)
 - API: `GET /api/financial/analyze/{ticker}` (with API key)
-- MCP: `analyze_stock(ticker="NVDA")` for on-demand analysis
+- MCP: `get_us_stocks`, `get_options`, `get_networth` for portfolio data
+- Google Sheets: Single source of truth for all positions
 
 Screening results feed into sell-put target list.

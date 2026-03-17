@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portfolio Dashboard</title>
+<title>穩健暴富收租室</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
@@ -83,6 +83,46 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .pos-tbl .sym { color: #6366f1; font-weight: 600; font-size: 17px; }
 .acct-summary { display: flex; gap: 16px; font-size: 15px; color: #475569; padding: 6px 0 12px; flex-wrap: wrap; }
 .acct-summary span { font-weight: 600; }
+
+/* AI Chat */
+.chat-container { display: flex; flex-direction: column; height: calc(100vh - 260px); min-height: 400px; background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+.chat-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #1e293b; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.6; word-break: break-word; white-space: pre-wrap; }
+.chat-msg.user { align-self: flex-end; background: #6366f1; color: #fff; border-bottom-right-radius: 4px; }
+.chat-msg.assistant { align-self: flex-start; background: #f1f5f9; color: #1e293b; border-bottom-left-radius: 4px; }
+.chat-msg.system { align-self: center; background: #fffbeb; color: #92400e; font-size: 13px; padding: 6px 12px; border-radius: 8px; }
+.chat-msg code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 13px; }
+.chat-msg pre { background: rgba(0,0,0,0.06); padding: 8px; border-radius: 6px; overflow-x: auto; margin: 6px 0; }
+.chat-images-preview { display: flex; gap: 8px; padding: 8px 16px; flex-wrap: wrap; }
+.chat-images-preview img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; }
+.chat-input-area { display: flex; align-items: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid #e2e8f0; background: #fff; }
+.chat-input-area textarea { flex: 1; resize: none; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; font-size: 15px; font-family: inherit; max-height: 100px; outline: none; }
+.chat-input-area textarea:focus { border-color: #6366f1; }
+.chat-attach-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; background: #f1f5f9; cursor: pointer; font-size: 18px; flex-shrink: 0; }
+.chat-send-btn { padding: 10px 16px; background: #6366f1; color: #fff; border: none; border-radius: 10px; font-size: 15px; cursor: pointer; flex-shrink: 0; }
+.chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.chat-fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 16px rgba(99,102,241,0.4); z-index: 50; display: flex; align-items: center; justify-content: center; }
+.chat-fab:hover { transform: scale(1.1); }
+.chat-quick-btns { display: flex; gap: 8px; padding: 8px 16px; flex-wrap: wrap; border-bottom: 1px solid #e2e8f0; }
+.chat-quick-btn { padding: 6px 12px; border-radius: 20px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.chat-quick-btn:hover { border-color: #6366f1; color: #6366f1; }
+.chat-ab-result { background: #f8fafc; border-radius: 12px; padding: 12px; margin: 4px 0; border-left: 3px solid #6366f1; }
+.chat-ab-result .ab-label { font-size: 12px; font-weight: 700; color: #6366f1; margin-bottom: 6px; }
+.chat-ab-result:nth-child(2) { border-left-color: #f97316; }
+.chat-ab-result:nth-child(2) .ab-label { color: #f97316; }
+
+/* Main Tabs (top-level) */
+.main-tabs { display: flex; gap: 0; margin: 0 -16px 16px; padding: 0 16px; border-bottom: 2px solid #e2e8f0; overflow-x: auto; }
+.main-tab { padding: 12px 20px; font-size: 16px; font-weight: 600; color: #94a3b8; background: none; border: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: all 0.2s; }
+.main-tab:hover { color: #6366f1; }
+.main-tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+.main-section { display: none; }
+.main-section.active { display: block; }
+.main-section .placeholder { text-align: center; padding: 80px 20px; color: #94a3b8; }
+.main-section .placeholder h2 { font-size: 20px; color: #475569; margin-bottom: 8px; }
+.main-section .placeholder p { font-size: 15px; }
+.fivelines-frame { width: 100%; height: calc(100vh - 180px); border: none; border-radius: 12px; background: #fff; }
 </style>
 </head>
 <body>
@@ -90,7 +130,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 <!-- Login Screen -->
 <div id="login-screen" style="display:flex; justify-content:center; align-items:center; height:100vh;">
   <div style="text-align:center; max-width: 360px;">
-    <h1 style="font-size:24px; margin-bottom:12px; color:#6366f1;">Portfolio Dashboard</h1>
+    <h1 style="font-size:24px; margin-bottom:12px; color:#6366f1;">穩健暴富收租室</h1>
     <p style="color:#475569; margin-bottom:24px; font-size:14px; line-height:1.6;">
       用 Google 帳號登入，追蹤你的投資組合。
     </p>
@@ -121,17 +161,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div style="display:flex;gap:8px">
     <a id="folder-link" href="#" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration:none;display:none">Drive 資料夾</a>
     <a id="sheets-link" href="#" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration:none;display:none">Google Sheets</a>
+    <a href="/settings" class="btn btn-secondary btn-sm" style="text-decoration:none">自動提醒</a>
     <button class="btn btn-secondary btn-sm" onclick="signOut()">登出</button>
   </div>
 </div>
 
+<!-- Main Top-Level Tabs -->
+<div class="main-tabs">
+  <button class="main-tab active" onclick="showMainTab('main-assets',this)">資產</button>
+  <button class="main-tab" onclick="showMainTab('main-9indicators',this)">九大指標</button>
+  <button class="main-tab" onclick="showMainTab('main-fivelines',this)">五線譜</button>
+  <button class="main-tab" onclick="showMainTab('main-chancellor',this)">丞相指標</button>
+  <button class="main-tab" onclick="showMainTab('main-meidaren',this)">梅大人</button>
+</div>
+
+<!-- Main Section: 資產 -->
+<div id="main-assets" class="main-section active">
 <div class="header">
-  <h1>Portfolio Dashboard</h1>
   <div class="networth" id="networth-display">Loading...</div>
   <div class="sub" id="networth-sub"></div>
   <div class="sub" id="fx-display"></div>
   <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="refreshData()">重新整理</button>
-  <button id="import-btn" class="btn btn-primary btn-sm" style="margin-top:8px;display:none" onclick="importFromNotion()">從 Notion 匯入</button>
 </div>
 
 <div class="tabs">
@@ -140,6 +190,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <button class="tab" onclick="showTab('tw',this)">台股</button>
   <button class="tab" onclick="showTab('options',this)">選擇權</button>
   <button class="tab" onclick="showTab('income',this)">收入支出</button>
+  <button class="tab" onclick="showTab('trades',this)">交易紀錄</button>
+  <button class="tab" id="ai-tab-btn" onclick="showTab('ai',this)">AI 助手</button>
 </div>
 
 <div id="overview" class="section active">
@@ -177,7 +229,86 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <button class="add-btn" onclick="openModal('loan')">+ 新增貸款</button>
   <div id="income-content"></div>
 </div>
+
+<div id="trades" class="section">
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+    <button class="add-btn" onclick="openModal('trade')">+ 新增交易紀錄</button>
+    <select id="trades-filter-result" onchange="renderTrades()" style="padding:6px 10px;border-radius:8px;border:1px solid #e2e8f0;font-size:13px">
+      <option value="">全部結果</option><option value="Win">Win</option><option value="Loss">Loss</option><option value="Breakeven">Breakeven</option>
+    </select>
+    <select id="trades-filter-type" onchange="renderTrades()" style="padding:6px 10px;border-radius:8px;border:1px solid #e2e8f0;font-size:13px">
+      <option value="">全部類型</option><option value="Stock">Stock</option><option value="Option">Option</option>
+    </select>
+    <input id="trades-filter-ticker" placeholder="搜尋 Ticker" oninput="renderTrades()" style="padding:6px 10px;border-radius:8px;border:1px solid #e2e8f0;font-size:13px;width:120px">
+  </div>
+  <div id="trades-summary" style="margin-bottom:12px"></div>
+  <div id="trades-content"><div class="empty-state"><p>尚無交易紀錄</p></div></div>
 </div>
+
+<div id="ai" class="section">
+  <div class="chat-container">
+    <div class="chat-header">
+      <span>AI 投資助手</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm" style="background:#f1f5f9;color:#475569" onclick="openAICostInfo()">費用說明</button>
+        <button class="btn btn-sm" style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0" onclick="openClaudeCodeInfo()">免費替代方案</button>
+        <button class="btn btn-sm btn-secondary" onclick="openAISettings()">設定</button>
+      </div>
+    </div>
+    <div class="chat-quick-btns">
+      <button class="chat-quick-btn" onclick="quickChat('根據我目前持股，建議 Covered Call 策略（strike、到期日、預期權利金），請先用 get_quote 查每檔現價')">法蘭西收租媽</button>
+      <button class="chat-quick-btn" onclick="quickChat('分析我目前持股的買賣建議，包括停損停利判斷')">持股買賣建議</button>
+      <button class="chat-quick-btn" onclick="quickChat('整理我們的討論重點，儲存到 Google Drive')">儲存討論記錄</button>
+      <button class="chat-quick-btn" onclick="quickChat('分析我的資產配置，給出調整建議')">資產配置分析</button>
+      <button class="chat-quick-btn" style="border-color:#8b5cf6;color:#8b5cf6" onclick="openABCompare()">AB AI 討論</button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-msg system">
+        歡迎使用 AI 投資助手！在「設定」中輸入 API Key，或點擊上方「免費替代方案」使用 Claude Code。
+      </div>
+    </div>
+    <div class="chat-images-preview" id="chat-images-preview" style="display:none"></div>
+    <div class="chat-input-area">
+      <label class="chat-attach-btn" title="上傳截圖">📎<input type="file" accept="image/*" multiple onchange="handleChatImages(event)" hidden></label>
+      <textarea id="chat-input" placeholder="問任何投資問題..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+      <button class="chat-send-btn" id="chat-send-btn" onclick="sendChat()">送出</button>
+    </div>
+  </div>
+</div>
+
+<button class="chat-fab" onclick="showTab('ai',document.getElementById('ai-tab-btn'))" title="AI 助手">🤖</button>
+</div><!-- /main-assets -->
+
+<!-- Main Section: 九大指標 -->
+<div id="main-9indicators" class="main-section">
+  <div class="placeholder">
+    <h2>九大指標</h2>
+    <p>即將推出 — 總經九大指標追蹤與分析</p>
+  </div>
+</div>
+
+<!-- Main Section: 五線譜 -->
+<div id="main-fivelines" class="main-section">
+  <iframe id="fivelines-iframe" class="fivelines-frame" src="about:blank"></iframe>
+</div>
+
+<!-- Main Section: 丞相指標 -->
+<div id="main-chancellor" class="main-section">
+  <div class="placeholder">
+    <h2>丞相指標</h2>
+    <p>即將推出 — 丞相指標分析系統</p>
+  </div>
+</div>
+
+<!-- Main Section: 梅大人 -->
+<div id="main-meidaren" class="main-section">
+  <div class="placeholder">
+    <h2>梅大人</h2>
+    <p>即將推出 — 梅大人投資策略</p>
+  </div>
+</div>
+
+</div><!-- /app -->
 
 <!-- Modals -->
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
@@ -212,6 +343,7 @@ const HEADERS = {
   Bonds:      ['name', 'face_value', 'coupon_rate', 'maturity', 'cost'],
   Loans:      ['name', 'rate', 'balance_twd', 'monthly_payment_twd'],
   Income:     ['name', 'amount_usd', 'amount_twd', 'frequency'],
+  Trades:     ['date', 'ticker', 'action', 'asset_type', 'qty', 'price', 'total_amount', 'account', 'pl', 'result', 'reason', 'lesson', 'tags'],
   Settings:   ['key', 'value'],
 };
 
@@ -242,6 +374,10 @@ async function initGoogleSignIn() {
         return;
       }
       gToken = tokenResponse.access_token;
+      // Cache token with expiry (default 3600s)
+      const expiresAt = Date.now() + (tokenResponse.expires_in || 3600) * 1000;
+      sessionStorage.setItem('gToken', gToken);
+      sessionStorage.setItem('gTokenExpiry', expiresAt);
       // Fetch user info from Google
       try {
         const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
@@ -249,12 +385,41 @@ async function initGoogleSignIn() {
         });
         const info = await res.json();
         gUser = { name: info.name, email: info.email, picture: info.picture };
+        sessionStorage.setItem('gUser', JSON.stringify(gUser));
       } catch(e) {
         gUser = { name: 'User', email: '', picture: '' };
       }
       enterApp();
     },
   });
+
+  // Try to restore session from cache
+  const cachedToken = sessionStorage.getItem('gToken');
+  const cachedExpiry = sessionStorage.getItem('gTokenExpiry');
+  if (cachedToken && cachedExpiry && Date.now() < parseInt(cachedExpiry)) {
+    gToken = cachedToken;
+    try {
+      const cachedUser = sessionStorage.getItem('gUser');
+      gUser = cachedUser ? JSON.parse(cachedUser) : { name: 'User', email: '', picture: '' };
+    } catch(e) { gUser = { name: 'User', email: '', picture: '' }; }
+    // Verify token is still valid
+    try {
+      const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${gToken}` }
+      });
+      if (r.ok) {
+        const info = await r.json();
+        gUser = { name: info.name, email: info.email, picture: info.picture };
+        sessionStorage.setItem('gUser', JSON.stringify(gUser));
+        enterApp();
+        return;
+      }
+    } catch(e) {}
+    // Token invalid, clear cache
+    sessionStorage.removeItem('gToken');
+    sessionStorage.removeItem('gTokenExpiry');
+    gToken = null;
+  }
 
   // Render a custom Sign In button that triggers the single OAuth flow
   const btn = document.getElementById('g-signin-btn');
@@ -276,15 +441,18 @@ function enterApp() {
 }
 
 function signOut() {
-  // Keep localStorage cache (so re-login finds the same sheet)
+  const tokenToRevoke = gToken;
   gUser = null;
   gToken = null;
   portfolio = null;
   spreadsheetId = null;
+  sessionStorage.removeItem('gToken');
+  sessionStorage.removeItem('gTokenExpiry');
+  sessionStorage.removeItem('gUser');
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('sheets-link').style.display = 'none';
-  google.accounts.oauth2.revoke(gToken, () => {});
+  if (tokenToRevoke) google.accounts.oauth2.revoke(tokenToRevoke, () => {});
 }
 
 // --- Google API helpers ---
@@ -380,6 +548,31 @@ async function createSpreadsheet() {
   return id;
 }
 
+async function ensureSheets() {
+  // Check which sheets exist, create missing ones
+  const meta = await gapi(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties.title`);
+  const metaData = await meta.json();
+  const existing = new Set((metaData.sheets || []).map(s => s.properties.title));
+  const missing = Object.keys(HEADERS).filter(name => !existing.has(name));
+  if (missing.length === 0) return;
+
+  // Create missing sheets
+  const requests = missing.map(title => ({ addSheet: { properties: { title } } }));
+  await gapi(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
+    method: 'POST', body: JSON.stringify({ requests }),
+  });
+
+  // Write headers for new sheets
+  const headerData = missing.map(sheet => ({
+    range: `${sheet}!A1:${String.fromCharCode(64 + HEADERS[sheet].length)}1`,
+    values: [HEADERS[sheet]],
+  }));
+  await gapi(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`, {
+    method: 'POST',
+    body: JSON.stringify({ valueInputOption: 'RAW', data: headerData }),
+  });
+}
+
 async function readAllSheets() {
   const ranges = Object.keys(HEADERS).map(s => `${s}!A1:Z1000`);
   const params = ranges.map(r => `ranges=${encodeURIComponent(r)}`).join('&');
@@ -457,9 +650,25 @@ function sheetsToPortfolio(sheets) {
     });
   }
 
+  // Trades
+  p.trades = [];
+  for (const row of (sheets.Trades || [])) {
+    p.trades.push({
+      date: row.date || '', ticker: row.ticker || '', action: row.action || '',
+      asset_type: row.asset_type || '', qty: parseFloat(row.qty) || 0,
+      price: parseFloat(row.price) || 0, total_amount: parseFloat(row.total_amount) || 0,
+      account: row.account || '', pl: parseFloat(row.pl) || 0, result: row.result || '',
+      reason: row.reason || '', lesson: row.lesson || '', tags: row.tags || '',
+    });
+  }
+
   // Settings
   for (const row of (sheets.Settings || [])) {
     if (row.key === 'tax_rate') p.settings.tax_rate = parseFloat(row.value) || 0.24;
+    if (row.key === 'claude_api_key') p.settings.claude_api_key = row.value;
+    if (row.key === 'openai_api_key') p.settings.openai_api_key = row.value;
+    if (row.key === 'gemini_api_key') p.settings.gemini_api_key = row.value;
+    if (row.key === 'ai_model') p.settings.ai_model = row.value;
   }
 
   return p;
@@ -498,6 +707,7 @@ function portfolioToSheetData(sheetName) {
   if (sheetName === 'Bonds') return portfolio.bonds || [];
   if (sheetName === 'Loans') return portfolio.loans || [];
   if (sheetName === 'Income') return portfolio.income_items || [];
+  if (sheetName === 'Trades') return portfolio.trades || [];
   return [];
 }
 
@@ -538,9 +748,9 @@ async function loadPortfolio() {
       }
     }
 
+    await ensureSheets();
     const sheets = await readAllSheets();
     portfolio = sheetsToPortfolio(sheets);
-    checkShowImportBtn();
     await refreshData();
   } catch(e) {
     console.error('Load portfolio error:', e);
@@ -597,6 +807,7 @@ function renderDashboard() {
   renderTW(data);
   renderOptions(data);
   renderIncome(data);
+  renderTrades();
 }
 
 function computeAll() {
@@ -1048,12 +1259,27 @@ function renderIncome(d) {
   `;
 }
 
-// --- Tab Navigation ---
+// --- Main Tab Navigation ---
+function showMainTab(id, btn) {
+  document.querySelectorAll('.main-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  // Lazy-load fivelines iframe
+  if (id === 'main-fivelines') {
+    const iframe = document.getElementById('fivelines-iframe');
+    if (iframe.src === 'about:blank') iframe.src = '/fivelines';
+  }
+}
+
+// --- Sub Tab Navigation (within 資產) ---
 function showTab(id, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if (btn) btn.classList.add('active');
+  // Ensure main-assets is visible
+  showMainTab('main-assets', document.querySelector('.main-tab'));
 }
 
 // --- Modal Forms ---
@@ -1116,6 +1342,25 @@ function openModal(type) {
       <div class="form-actions">
         <button class="btn btn-secondary" onclick="closeModal()">取消</button>
         <button class="btn btn-primary" onclick="saveIncomeItem()">儲存</button>
+      </div>`,
+    'trade': `
+      <h3>新增交易紀錄</h3>
+      <div class="form-group"><label>日期</label><input id="f-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="form-group"><label>Ticker</label><input id="f-ticker" placeholder="e.g. NVDA" style="text-transform:uppercase"></div>
+      <div class="form-group"><label>動作</label><select id="f-action"><option value="Buy">Buy</option><option value="Sell">Sell</option><option value="Open">Open</option><option value="Close">Close</option><option value="Roll">Roll</option></select></div>
+      <div class="form-group"><label>類型</label><select id="f-asset-type"><option value="Stock">Stock</option><option value="Option">Option</option></select></div>
+      <div class="form-group"><label>數量</label><input id="f-qty" type="number" step="any"></div>
+      <div class="form-group"><label>價格</label><input id="f-price" type="number" step="any"></div>
+      <div class="form-group"><label>總金額 (USD)</label><input id="f-total" type="number" step="any"></div>
+      <div class="form-group"><label>帳戶</label><input id="f-account" placeholder="e.g. Firstrade_US"></div>
+      <div class="form-group"><label>盈虧 (已實現)</label><input id="f-pl" type="number" step="any" placeholder="選填"></div>
+      <div class="form-group"><label>結果</label><select id="f-result"><option value="">--</option><option value="Win">Win</option><option value="Loss">Loss</option><option value="Breakeven">Breakeven</option></select></div>
+      <div class="form-group"><label>理由</label><textarea id="f-reason" rows="2" placeholder="為什麼做這筆交易"></textarea></div>
+      <div class="form-group"><label>檢討</label><textarea id="f-lesson" rows="2" placeholder="事後學到什麼（選填）"></textarea></div>
+      <div class="form-group"><label>標籤</label><input id="f-tags" placeholder="逗號分隔，e.g. tech,momentum"></div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveTrade()">儲存</button>
       </div>`,
     'loan': `
       <h3>新增貸款</h3>
@@ -1282,89 +1527,566 @@ async function deleteLoan(name) {
   renderDashboard();
 }
 
-// --- Import from Notion ---
-async function importFromNotion() {
-  if (!confirm('從 Notion 匯入會覆蓋目前 Google Sheets 的資料，確定？')) return;
-  const btn = document.getElementById('import-btn');
-  btn.textContent = '匯入中...';
-  btn.disabled = true;
+async function saveTrade() {
+  const date = document.getElementById('f-date').value;
+  const ticker = document.getElementById('f-ticker').value.trim().toUpperCase();
+  const action = document.getElementById('f-action').value;
+  const asset_type = document.getElementById('f-asset-type').value;
+  const qty = parseFloat(document.getElementById('f-qty').value);
+  const price = parseFloat(document.getElementById('f-price').value);
+  const total_amount = parseFloat(document.getElementById('f-total').value);
+  const account = document.getElementById('f-account').value.trim();
+  const pl = parseFloat(document.getElementById('f-pl').value) || 0;
+  const result = document.getElementById('f-result').value;
+  const reason = document.getElementById('f-reason').value.trim();
+  const lesson = document.getElementById('f-lesson').value.trim();
+  const tags = document.getElementById('f-tags').value.trim();
+  if (!date || !ticker || !account || isNaN(qty) || isNaN(price)) return alert('請填寫必要欄位');
 
-  try {
-    // Fetch all data from Notion via API
-    const [usR, twR, optR, bondR, loanR] = await Promise.all([
-      fetch('/api/stocks/us'), fetch('/api/stocks/tw'), fetch('/api/options'),
-      fetch('/api/bonds'), fetch('/api/loans'),
-    ]);
-    const [usJson, twJson, optJson, bondJson, loanJson] = await Promise.all([
-      usR.json(), twR.json(), optR.json(), bondR.json(), loanR.json(),
-    ]);
-
-    // US Stocks
-    const usData = [];
-    for (const [acct, info] of Object.entries(usJson.accounts || {})) {
-      for (const p of info.positions) usData.push([acct, p.ticker, p.shares, p.avg_cost]);
-    }
-
-    // TW Stocks
-    const twData = [];
-    for (const [acct, info] of Object.entries(twJson.accounts || {})) {
-      for (const p of info.positions) twData.push([p.ticker, p.name || '', acct, p.shares, p.avg_cost_twd]);
-    }
-
-    // Options
-    const optData = [];
-    for (const p of (optJson.positions || [])) {
-      optData.push([p.account, p.ticker, p.expiry, p.strike, p.type, p.qty, p.cost_basis]);
-    }
-
-    // Bonds
-    const bondData = [];
-    for (const b of (bondJson.bonds || [])) {
-      bondData.push([b.name, b.face, b.coupon, b.maturity || '', b.cost]);
-    }
-
-    // Loans
-    const loanData = [];
-    for (const l of (loanJson.loans || [])) {
-      loanData.push([l.name, l.rate, l.balance, l.monthly]);
-    }
-
-    // Write all to Google Sheets
-    const h = HEADERS;
-    const batchData = [
-      { range: `US_Stocks!A1:D${usData.length + 1}`, values: [h.US_Stocks, ...usData] },
-      { range: `TW_Stocks!A1:E${twData.length + 1}`, values: [h.TW_Stocks, ...twData] },
-      { range: `Options!A1:G${optData.length + 1}`, values: [h.Options, ...optData] },
-      { range: `Bonds!A1:E${bondData.length + 1}`, values: [h.Bonds, ...bondData] },
-      { range: `Loans!A1:D${loanData.length + 1}`, values: [h.Loans, ...loanData] },
-    ];
-
-    await gapi(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`, {
-      method: 'POST',
-      body: JSON.stringify({ valueInputOption: 'RAW', data: batchData }),
-    });
-
-    // Reload
-    const sheets = await readAllSheets();
-    portfolio = sheetsToPortfolio(sheets);
-    btn.style.display = 'none';
-    alert(`匯入完成！\n美股 ${usData.length} 筆、台股 ${twData.length} 筆、選擇權 ${optData.length} 筆、債券 ${bondData.length} 筆、貸款 ${loanData.length} 筆`);
-    await refreshData();
-  } catch(e) {
-    console.error('Import error:', e);
-    alert('匯入失敗：' + e.message);
-  }
-  btn.textContent = '從 Notion 匯入';
-  btn.disabled = false;
+  if (!portfolio.trades) portfolio.trades = [];
+  portfolio.trades.push({ date, ticker, action, asset_type, qty, price, total_amount: total_amount || qty * price, account, pl, result, reason, lesson, tags });
+  closeModal();
+  await saveSheet('Trades');
+  renderTrades();
 }
 
-function checkShowImportBtn() {
-  // Show import button if portfolio is empty
-  const hasUS = Object.values(portfolio?.accounts || {}).some(a => a.us_stocks?.length > 0);
-  const hasTW = (portfolio?.tw_stocks || []).length > 0;
-  if (!hasUS && !hasTW) {
-    document.getElementById('import-btn').style.display = 'inline-block';
+async function deleteTrade(idx) {
+  if (!confirm('確定刪除此筆交易？')) return;
+  portfolio.trades.splice(idx, 1);
+  await saveSheet('Trades');
+  renderTrades();
+}
+
+function renderTrades() {
+  let trades = portfolio.trades || [];
+  // Apply filters
+  const filterResult = document.getElementById('trades-filter-result')?.value;
+  const filterType = document.getElementById('trades-filter-type')?.value;
+  const filterTicker = document.getElementById('trades-filter-ticker')?.value?.toUpperCase();
+  if (filterResult) trades = trades.filter(t => t.result === filterResult);
+  if (filterType) trades = trades.filter(t => t.asset_type === filterType);
+  if (filterTicker) trades = trades.filter(t => t.ticker.includes(filterTicker));
+
+  // Sort by date descending
+  const sorted = [...trades].map((t, i) => ({ ...t, _origIdx: (portfolio.trades || []).indexOf(t) }));
+  sorted.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  // Summary
+  const wins = sorted.filter(t => t.result === 'Win').length;
+  const losses = sorted.filter(t => t.result === 'Loss').length;
+  const totalPL = sorted.reduce((s, t) => s + (t.pl || 0), 0);
+  const winRate = (wins + losses) > 0 ? Math.round(wins / (wins + losses) * 100) : 0;
+  document.getElementById('trades-summary').innerHTML = `
+    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px">
+      <span>共 <b>${sorted.length}</b> 筆</span>
+      <span style="color:#16a34a">Win: <b>${wins}</b></span>
+      <span style="color:#dc2626">Loss: <b>${losses}</b></span>
+      <span>勝率: <b>${winRate}%</b></span>
+      <span>總盈虧: <b style="color:${totalPL >= 0 ? '#16a34a' : '#dc2626'}">$${totalPL.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</b></span>
+    </div>`;
+
+  if (sorted.length === 0) {
+    document.getElementById('trades-content').innerHTML = '<div class="empty-state"><p>尚無交易紀錄</p></div>';
+    return;
   }
+
+  let html = '<div class="table-wrapper"><table><thead><tr><th>日期</th><th>Ticker</th><th>動作</th><th>類型</th><th>數量</th><th>價格</th><th>金額</th><th>帳戶</th><th>盈虧</th><th>結果</th><th>理由</th><th></th></tr></thead><tbody>';
+  for (const t of sorted) {
+    const plColor = t.pl > 0 ? '#16a34a' : t.pl < 0 ? '#dc2626' : '#64748b';
+    const resultBadge = t.result === 'Win' ? '<span style="color:#16a34a;font-weight:600">W</span>'
+      : t.result === 'Loss' ? '<span style="color:#dc2626;font-weight:600">L</span>'
+      : t.result === 'Breakeven' ? '<span style="color:#f59e0b;font-weight:600">B</span>' : '-';
+    html += `<tr>
+      <td style="white-space:nowrap">${t.date}</td>
+      <td><b>${t.ticker}</b></td>
+      <td>${t.action}</td>
+      <td>${t.asset_type}</td>
+      <td>${t.qty}</td>
+      <td>$${t.price?.toFixed(2) || '-'}</td>
+      <td>$${t.total_amount?.toLocaleString(undefined, {maximumFractionDigits:0}) || '-'}</td>
+      <td style="font-size:12px">${t.account}</td>
+      <td style="color:${plColor};font-weight:600">${t.pl ? '$' + t.pl.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) : '-'}</td>
+      <td>${resultBadge}</td>
+      <td style="max-width:200px;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(t.reason||'').replace(/"/g,'&quot;')}${t.lesson ? '\n---\n' + t.lesson : ''}">${t.reason || '-'}</td>
+      <td><button class="delete-btn" onclick="deleteTrade(${t._origIdx})">✕</button></td>
+    </tr>`;
+  }
+  html += '</tbody></table></div>';
+  document.getElementById('trades-content').innerHTML = html;
+}
+
+// --- AI Chat ---
+let chatHistory = [];
+let chatImages = [];
+let rsaPublicKey = null;
+
+function addChatMessage(role, text) {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  // Simple markdown: **bold**, `code`, ```code blocks```
+  let html = text
+    .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  div.innerHTML = html;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function buildPortfolioSummary() {
+  if (!portfolio) return '';
+  const data = computeAll();
+  const lines = [];
+  // US stocks
+  for (const [acct, info] of Object.entries(data.accounts || {})) {
+    for (const p of (info.positions || [])) {
+      lines.push(`US|${acct}|${p.ticker}|${p.shares}股|成本$${p.avgCost}|現價$${p.price||'?'}|損益${p.plPct?.toFixed(1)||'?'}%`);
+    }
+    for (const o of (info.options || [])) {
+      lines.push(`OPT|${acct}|${o.ticker}|${o.type}${o.strike}|到期${o.expiry}|DTE${o.dte}|${o.action}`);
+    }
+  }
+  for (const p of (data.tw?.positions || [])) {
+    lines.push(`TW|${p.name||p.ticker}|${p.shares}股|成本NT$${p.avgCost}|損益${p.plPct?.toFixed(1)||'?'}%`);
+  }
+  lines.push(`FX: USD/TWD=${data.fx}`);
+  return lines.join('\n');
+}
+
+async function fetchPublicKey() {
+  if (rsaPublicKey) return rsaPublicKey;
+  const r = await fetch('/api/ai/pubkey');
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.detail || 'Failed to fetch public key');
+  // Parse PEM to CryptoKey
+  const pem = d.public_key;
+  const b64 = pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, '');
+  const binary = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  rsaPublicKey = await crypto.subtle.importKey('spki', binary, { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['encrypt']);
+  return rsaPublicKey;
+}
+
+async function encryptSecrets() {
+  // Hybrid encryption: AES-GCM encrypts payload, RSA-OAEP encrypts AES key
+  const rsaKey = await fetchPublicKey();
+  const s = portfolio?.settings || {};
+  const payload = {
+    claude_api_key: s.claude_api_key || '',
+    openai_api_key: s.openai_api_key || '',
+    gemini_api_key: s.gemini_api_key || '',
+    google_token: gToken || '',
+  };
+  const plaintext = new TextEncoder().encode(JSON.stringify(payload));
+
+  // Generate random AES-256 key and IV
+  const aesKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt']);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const aesEncrypted = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, plaintext));
+
+  // Export and RSA-encrypt the AES key
+  const rawAesKey = new Uint8Array(await crypto.subtle.exportKey('raw', aesKey));
+  const rsaEncrypted = new Uint8Array(await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, rsaKey, rawAesKey));
+
+  // Concatenate: rsaBlock(256B) + iv(12B) + aesCiphertext
+  const combined = new Uint8Array(rsaEncrypted.length + iv.length + aesEncrypted.length);
+  combined.set(rsaEncrypted, 0);
+  combined.set(iv, rsaEncrypted.length);
+  combined.set(aesEncrypted, rsaEncrypted.length + iv.length);
+  return btoa(String.fromCharCode(...combined));
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  const s = portfolio?.settings || {};
+  const model = s.ai_model || 'sonnet';
+  const providerMap = { sonnet:'claude', opus:'claude', 'gpt-4o':'openai', 'gpt-4o-mini':'openai', 'gemini-flash':'gemini', 'gemini-pro':'gemini' };
+  const keyMap = { claude: s.claude_api_key, openai: s.openai_api_key, gemini: s.gemini_api_key };
+  const provider = providerMap[model] || 'claude';
+  if (!keyMap[provider]) {
+    addChatMessage('system', `請先在「設定」中輸入 ${provider === 'claude' ? 'Claude' : provider === 'openai' ? 'OpenAI' : 'Gemini'} API Key`);
+    return;
+  }
+
+  input.value = '';
+  addChatMessage('user', msg);
+
+  // Collect images
+  const images = [...chatImages];
+  chatImages = [];
+  document.getElementById('chat-images-preview').style.display = 'none';
+  document.getElementById('chat-images-preview').innerHTML = '';
+
+  const sendBtn = document.getElementById('chat-send-btn');
+  sendBtn.disabled = true;
+  sendBtn.textContent = '思考中...';
+
+  try {
+    const encrypted = await encryptSecrets();
+    const body = {
+      message: msg,
+      images: images,
+      encrypted_secrets: encrypted,
+      spreadsheet_id: spreadsheetId || '',
+      portfolio_summary: buildPortfolioSummary(),
+      conversation_history: chatHistory.slice(-20),
+      model: portfolio?.settings?.ai_model || 'sonnet',
+    };
+
+    const r = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (!r.ok) {
+      let errMsg = `HTTP ${r.status}`;
+      try { const err = await r.json(); errMsg = err.detail || errMsg; } catch(e) {}
+      throw new Error(errMsg);
+    }
+
+    const data = await r.json();
+    addChatMessage('assistant', data.response_text);
+
+    // Update history
+    chatHistory.push({ role: 'user', content: msg });
+    chatHistory.push({ role: 'assistant', content: data.response_text });
+
+    // If sheets were updated, refresh
+    if (data.updated_sheets?.length > 0) {
+      addChatMessage('system', `已更新: ${data.updated_sheets.join(', ')}，重新載入中...`);
+      const sheets = await readAllSheets();
+      portfolio = sheetsToPortfolio(sheets);
+      await refreshData();
+    }
+
+    // Show actions
+    if (data.actions_taken?.length > 0) {
+      const tools = data.actions_taken.map(a => a.tool).join(', ');
+      addChatMessage('system', `使用工具: ${tools}`);
+    }
+  } catch (e) {
+    addChatMessage('system', `錯誤: ${e.message}`);
+  }
+
+  sendBtn.disabled = false;
+  sendBtn.textContent = '送出';
+}
+
+function quickChat(msg) {
+  document.getElementById('chat-input').value = msg;
+  sendChat();
+}
+
+function handleChatImages(event) {
+  const files = event.target.files;
+  const preview = document.getElementById('chat-images-preview');
+  preview.style.display = 'flex';
+
+  for (const file of files) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      // Compress to max 1024px
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        const max = 1024;
+        if (w > max || h > max) {
+          if (w > h) { h = Math.round(h * max / w); w = max; }
+          else { w = Math.round(w * max / h); h = max; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        chatImages.push(dataUrl);
+
+        const previewImg = document.createElement('img');
+        previewImg.src = dataUrl;
+        preview.appendChild(previewImg);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  event.target.value = '';
+}
+
+function maskKey(k) { return k ? k.substring(0, 7) + '***' + k.slice(-4) : ''; }
+function openAISettings() {
+  const s = portfolio?.settings || {};
+  const currentModel = s.ai_model || 'sonnet';
+  const modal = document.getElementById('modal-content');
+  const overlay = document.getElementById('modal-overlay');
+  const models = [
+    ['sonnet', 'Claude Sonnet (快速)'],
+    ['opus', 'Claude Opus (最強)'],
+    ['gpt-4o', 'GPT-4o'],
+    ['gpt-4o-mini', 'GPT-4o Mini (便宜)'],
+    ['gemini-flash', 'Gemini 2.5 Flash (快速)'],
+    ['gemini-pro', 'Gemini 2.5 Pro'],
+  ];
+  modal.innerHTML = `
+    <h3>AI 助手設定</h3>
+    <div class="form-group">
+      <label>Claude API Key</label>
+      <input id="f-claude-key" type="password" placeholder="sk-ant-..." value="${s.claude_api_key || ''}">
+      ${s.claude_api_key ? `<div style="font-size:12px;color:#94a3b8;margin-top:4px">${maskKey(s.claude_api_key)}</div>` : ''}
+    </div>
+    <div class="form-group">
+      <label>OpenAI API Key</label>
+      <input id="f-openai-key" type="password" placeholder="sk-..." value="${s.openai_api_key || ''}">
+      ${s.openai_api_key ? `<div style="font-size:12px;color:#94a3b8;margin-top:4px">${maskKey(s.openai_api_key)}</div>` : ''}
+    </div>
+    <div class="form-group">
+      <label>Gemini API Key</label>
+      <input id="f-gemini-key" type="password" placeholder="AIza..." value="${s.gemini_api_key || ''}">
+      ${s.gemini_api_key ? `<div style="font-size:12px;color:#94a3b8;margin-top:4px">${maskKey(s.gemini_api_key)}</div>` : ''}
+    </div>
+    <div class="form-group">
+      <label>預設模型</label>
+      <select id="f-ai-model">
+        ${models.map(([v, l]) => `<option value="${v}" ${currentModel === v ? 'selected' : ''}>${l}</option>`).join('')}
+      </select>
+    </div>
+    <div style="font-size:12px;color:#475569;margin-bottom:12px;line-height:1.6">
+      API Key 存在你的 Google Sheets，加密傳輸，伺服器不保存。<br>
+      只需填你想用的模型對應的 Key。
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveAISettings()">儲存</button>
+    </div>
+  `;
+  overlay.classList.add('active');
+}
+
+async function saveAISettings() {
+  const claudeKey = document.getElementById('f-claude-key').value.trim();
+  const openaiKey = document.getElementById('f-openai-key').value.trim();
+  const geminiKey = document.getElementById('f-gemini-key').value.trim();
+  const model = document.getElementById('f-ai-model').value;
+
+  if (!claudeKey && !openaiKey && !geminiKey) { alert('請至少輸入一組 API Key'); return; }
+
+  if (!portfolio.settings) portfolio.settings = {};
+  portfolio.settings.claude_api_key = claudeKey;
+  portfolio.settings.openai_api_key = openaiKey;
+  portfolio.settings.gemini_api_key = geminiKey;
+  portfolio.settings.ai_model = model;
+
+  const settingsRows = [
+    { key: 'tax_rate', value: portfolio.settings.tax_rate || 0.24 },
+    { key: 'claude_api_key', value: claudeKey },
+    { key: 'openai_api_key', value: openaiKey },
+    { key: 'gemini_api_key', value: geminiKey },
+    { key: 'ai_model', value: model },
+  ];
+  await writeSheet('Settings', settingsRows);
+
+  closeModal();
+  const modelLabels = { sonnet:'Sonnet', opus:'Opus', 'gpt-4o':'GPT-4o', 'gpt-4o-mini':'GPT-4o Mini', 'gemini-flash':'Gemini Flash', 'gemini-pro':'Gemini Pro' };
+  addChatMessage('system', `已儲存！預設模型: ${modelLabels[model] || model}`);
+}
+
+function openABCompare() {
+  const s = portfolio?.settings || {};
+  const allModels = [
+    ['sonnet', 'Claude Sonnet', !!s.claude_api_key],
+    ['opus', 'Claude Opus', !!s.claude_api_key],
+    ['gpt-4o', 'GPT-4o', !!s.openai_api_key],
+    ['gpt-4o-mini', 'GPT-4o Mini', !!s.openai_api_key],
+    ['gemini-flash', 'Gemini Flash', !!s.gemini_api_key],
+    ['gemini-pro', 'Gemini Pro', !!s.gemini_api_key],
+  ].filter(m => m[2]);
+
+  if (allModels.length < 2) {
+    addChatMessage('system', 'AB 比較需要至少設定 2 家 API Key（例如 Claude + GPT）');
+    return;
+  }
+
+  const modal = document.getElementById('modal-content');
+  const overlay = document.getElementById('modal-overlay');
+  modal.innerHTML = `
+    <h3>AB AI 討論</h3>
+    <p style="font-size:13px;color:#475569;margin-bottom:12px">同一問題送給兩個 AI，比較回答差異</p>
+    <div class="form-group">
+      <label>問題</label>
+      <textarea id="f-ab-question" rows="3" style="width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:inherit;">根據我目前持股，建議 Covered Call 策略</textarea>
+    </div>
+    <div style="display:flex;gap:12px">
+      <div class="form-group" style="flex:1">
+        <label>模型 A</label>
+        <select id="f-ab-model-a">
+          ${allModels.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group" style="flex:1">
+        <label>模型 B</label>
+        <select id="f-ab-model-b">
+          ${allModels.map(([v, l], i) => `<option value="${v}" ${i === 1 ? 'selected' : ''}>${l}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="startABCompare()">開始比較</button>
+    </div>
+  `;
+  overlay.classList.add('active');
+}
+
+async function startABCompare() {
+  const question = document.getElementById('f-ab-question').value.trim();
+  const modelA = document.getElementById('f-ab-model-a').value;
+  const modelB = document.getElementById('f-ab-model-b').value;
+  if (!question) return;
+  if (modelA === modelB) { alert('請選擇不同的模型'); return; }
+  closeModal();
+
+  const labels = { sonnet:'Claude Sonnet', opus:'Claude Opus', 'gpt-4o':'GPT-4o', 'gpt-4o-mini':'GPT-4o Mini', 'gemini-flash':'Gemini Flash', 'gemini-pro':'Gemini Pro' };
+  addChatMessage('user', question);
+  addChatMessage('system', `AB 比較中：${labels[modelA]} vs ${labels[modelB]}...`);
+
+  const sendBtn = document.getElementById('chat-send-btn');
+  sendBtn.disabled = true;
+  sendBtn.textContent = 'AB 比較中...';
+
+  try {
+    const encrypted = await encryptSecrets();
+    const baseBody = {
+      message: question,
+      images: [],
+      encrypted_secrets: encrypted,
+      spreadsheet_id: spreadsheetId || '',
+      portfolio_summary: buildPortfolioSummary(),
+      conversation_history: [],
+    };
+
+    const [resA, resB] = await Promise.all([
+      fetch('/api/ai/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...baseBody, model: modelA }) }).then(r => r.json()),
+      fetch('/api/ai/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...baseBody, model: modelB }) }).then(r => r.json()),
+    ]);
+
+    const container = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.style.cssText = 'align-self:flex-start;max-width:95%;width:100%;';
+    div.innerHTML = `
+      <div class="chat-ab-result">
+        <div class="ab-label">${labels[modelA]}</div>
+        <div style="font-size:14px;line-height:1.6;white-space:pre-wrap">${(resA.response_text || resA.detail || 'Error').replace(/</g,'&lt;')}</div>
+      </div>
+      <div class="chat-ab-result">
+        <div class="ab-label">${labels[modelB]}</div>
+        <div style="font-size:14px;line-height:1.6;white-space:pre-wrap">${(resB.response_text || resB.detail || 'Error').replace(/</g,'&lt;')}</div>
+      </div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  } catch (e) {
+    addChatMessage('system', `AB 比較失敗: ${e.message}`);
+  }
+
+  sendBtn.disabled = false;
+  sendBtn.textContent = '送出';
+}
+
+function openAICostInfo() {
+  const modal = document.getElementById('modal-content');
+  const overlay = document.getElementById('modal-overlay');
+  modal.innerHTML = `
+    <h3>AI 助手費用說明</h3>
+    <div style="font-size:14px;line-height:1.8;color:#475569;">
+
+    <div style="font-weight:600;color:#1e293b;margin-bottom:4px;">用多少付多少，沒有月費</div>
+    <p>AI 助手使用你自己的 Claude API Key，按實際用量計費。就像打電話，講多久收多久。</p>
+
+    <div style="font-weight:600;color:#1e293b;margin:12px 0 4px;">按一次按鈕花多少？</div>
+    <p>以「法蘭西收租媽」為例：</p>
+    <ol style="padding-left:20px;margin:8px 0;">
+      <li>AI 讀取你的投資策略 + 持倉摘要</li>
+      <li>呼叫工具查詢 CCJ、GOOG、TSM、MU 即時股價</li>
+      <li>根據現價 + 策略規則，產出 Covered Call 建議</li>
+    </ol>
+
+    <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;">
+      <tr style="background:#f8fafc;"><th style="text-align:left;padding:6px;border:1px solid #e2e8f0;">模型</th><th style="padding:6px;border:1px solid #e2e8f0;">每次</th><th style="padding:6px;border:1px solid #e2e8f0;">月估(5次/天)</th></tr>
+      <tr><td style="padding:6px;border:1px solid #e2e8f0;">Gemini Flash</td><td style="padding:6px;border:1px solid #e2e8f0;text-align:center;">~NT$0.3</td><td style="padding:6px;border:1px solid #e2e8f0;text-align:center;color:#16a34a;font-weight:600;">~NT$50</td></tr>
+      <tr><td style="padding:6px;border:1px solid #e2e8f0;">GPT-4o Mini</td><td style="padding:6px;border:1px solid #e2e8f0;text-align:center;">~NT$0.5</td><td style="padding:6px;border:1px solid #e2e8f0;text-align:center;color:#16a34a;font-weight:600;">~NT$80</td></tr>
+      <tr><td style="padding:6px;border:1px solid #e2e8f0;">Claude Sonnet</td><td style="padding:6px;border:1px solid #e2e8f0;text-align:center;">~NT$1.5</td><td style="padding:6px;border:1px solid #e2e8f0;text-align:center;color:#16a34a;font-weight:600;">~NT$200</td></tr>
+      <tr><td style="padding:6px;border:1px solid #e2e8f0;">GPT-4o</td><td style="padding:6px;border:1px solid #e2e8f0;text-align:center;">~NT$2</td><td style="padding:6px;border:1px solid #e2e8f0;text-align:center;color:#d97706;font-weight:600;">~NT$300</td></tr>
+      <tr><td style="padding:6px;border:1px solid #e2e8f0;">Gemini Pro</td><td style="padding:6px;border:1px solid #e2e8f0;text-align:center;">~NT$4</td><td style="padding:6px;border:1px solid #e2e8f0;text-align:center;color:#d97706;font-weight:600;">~NT$600</td></tr>
+      <tr><td style="padding:6px;border:1px solid #e2e8f0;">Claude Opus</td><td style="padding:6px;border:1px solid #e2e8f0;text-align:center;">~NT$7.5</td><td style="padding:6px;border:1px solid #e2e8f0;text-align:center;color:#dc2626;font-weight:600;">~NT$1,000</td></tr>
+    </table>
+
+    <div style="font-weight:600;color:#1e293b;margin:12px 0 4px;">怎麼拿 API Key？</div>
+    <table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:13px;">
+      <tr><td style="padding:4px 8px;border:1px solid #e2e8f0;font-weight:600;">Claude</td><td style="padding:4px 8px;border:1px solid #e2e8f0;"><a href="https://console.anthropic.com" target="_blank" style="color:#6366f1;">console.anthropic.com</a></td></tr>
+      <tr><td style="padding:4px 8px;border:1px solid #e2e8f0;font-weight:600;">OpenAI</td><td style="padding:4px 8px;border:1px solid #e2e8f0;"><a href="https://platform.openai.com/api-keys" target="_blank" style="color:#6366f1;">platform.openai.com</a></td></tr>
+      <tr><td style="padding:4px 8px;border:1px solid #e2e8f0;font-weight:600;">Gemini</td><td style="padding:4px 8px;border:1px solid #e2e8f0;"><a href="https://aistudio.google.com/apikey" target="_blank" style="color:#6366f1;">aistudio.google.com</a></td></tr>
+    </table>
+    <p style="margin:8px 0;">各平台儲值 US$5（~NT$160）就能用很久，貼到「設定」即可。</p>
+
+    <div style="font-weight:600;color:#1e293b;margin:12px 0 4px;">安全嗎？</div>
+    <ul style="padding-left:20px;margin:8px 0;">
+      <li>API Key 存在<strong>你自己的 Google Sheets</strong></li>
+      <li>傳輸時用 RSA + AES 雙重加密</li>
+      <li>伺服器不保存任何 Key，用完即丟</li>
+      <li>你隨時可以在 Anthropic 後台撤銷 Key</li>
+    </ul>
+
+    </div>
+    <div class="form-actions" style="margin-top:16px;">
+      <button class="btn btn-secondary" onclick="closeModal()" style="flex:1;">了解了</button>
+    </div>
+  `;
+  overlay.classList.add('active');
+}
+
+function openClaudeCodeInfo() {
+  const modal = document.getElementById('modal-content');
+  const overlay = document.getElementById('modal-overlay');
+  modal.innerHTML = `
+    <h3>免費替代方案：Claude Code + MCP</h3>
+    <div style="font-size:14px;line-height:1.8;color:#475569;">
+
+    <p>本站已內建 <b>MCP Server</b>，搭配 <a href="https://claude.ai/code" target="_blank" style="color:#3b82f6">Claude Code</a>（Anthropic 官方 CLI）使用，可以直接讀寫你的 Google Sheets 投資資料，並獲得完整的投資分析建議。</p>
+
+    <div style="font-weight:600;color:#1e293b;margin:12px 0 4px;">功能完全相同</div>
+    <ul style="padding-left:20px;margin:4px 0 8px;">
+      <li>即時查價、持倉損益計算</li>
+      <li>基本面分析、五線譜技術分析</li>
+      <li>Covered Call / Sell Put 策略建議</li>
+      <li>交易紀錄管理（新增、查詢、篩選）</li>
+      <li>淨資產總覽、資產配置分析</li>
+    </ul>
+
+    <div style="font-weight:600;color:#1e293b;margin:12px 0 4px;">一鍵安裝</div>
+    <div style="background:#f1f5f9;padding:10px 14px;border-radius:8px;display:flex;align-items:center;gap:8px">
+      <code style="flex:1;font-size:13px;word-break:break-all">curl -sL https://stock.cwithb.com/setup.sh | bash</code>
+      <button onclick="navigator.clipboard.writeText('curl -sL https://stock.cwithb.com/setup.sh | bash');this.textContent='✓ 已複製';setTimeout(()=>this.textContent='複製',1500)" style="padding:4px 12px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;white-space:nowrap">複製</button>
+    </div>
+    <p style="margin-top:6px;font-size:12px;color:#64748b">需要先安裝 <a href="https://nodejs.org" target="_blank" style="color:#3b82f6">Node.js</a> 和 <a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank" style="color:#3b82f6">Claude Code</a>（<code>npm i -g @anthropic-ai/claude-code</code>）</p>
+
+    <div style="font-weight:600;color:#1e293b;margin:12px 0 4px;">安裝後可以做什麼？</div>
+    <pre style="background:#1e293b;color:#e2e8f0;padding:10px 14px;border-radius:8px;font-size:12px;overflow-x:auto;margin:4px 0;line-height:1.6"><span style="color:#94a3b8">$</span> claude
+<span style="color:#22c55e">></span> 查詢我的美股持倉
+<span style="color:#22c55e">></span> 建議 Covered Call 策略
+<span style="color:#22c55e">></span> 分析 NVDA 基本面和技術面
+<span style="color:#22c55e">></span> 我今天賣了 100 股 NVDA，幫我記錄</pre>
+
+    <p style="margin-top:8px;font-size:12px;color:#94a3b8">Claude Code 使用 Claude Max 訂閱（$100/月 或 $200/月）或按量計費。MCP Server 直接讀取你的 Google Sheets，資料完全在本地處理，不經過任何伺服器。</p>
+
+    </div>
+    <div class="form-actions" style="margin-top:16px;">
+      <button class="btn btn-secondary" onclick="closeModal()" style="flex:1;">了解了</button>
+    </div>
+  `;
+  overlay.classList.add('active');
 }
 
 // --- Init ---

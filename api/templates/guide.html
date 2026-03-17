@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投資寶庫 — Claude 設定指南</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+  .container { max-width: 800px; margin: 0 auto; padding: 24px 20px 60px; }
+  h1 { font-size: 1.8rem; margin-bottom: 8px; color: #fff; }
+  h1 span { font-size: 0.9rem; color: #888; font-weight: normal; }
+  .subtitle { color: #888; margin-bottom: 32px; font-size: 0.95rem; }
+  h2 { font-size: 1.3rem; color: #fff; margin: 36px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #333; }
+  h3 { font-size: 1.05rem; color: #ccc; margin: 20px 0 10px; }
+  p { margin: 10px 0; color: #bbb; }
+  a { color: #6eb5ff; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { background: #1a1a2e; color: #a8d8a8; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: "SF Mono", Monaco, monospace; }
+  pre { background: #1a1a2e; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 12px 0; font-size: 0.85rem; line-height: 1.6; border: 1px solid #2a2a3e; }
+  pre code { background: none; padding: 0; }
+  .step { background: #141420; border: 1px solid #2a2a3e; border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .step-num { display: inline-block; background: #6eb5ff; color: #000; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; font-size: 0.85rem; margin-right: 10px; }
+  .method { background: #1a1a2e; border: 1px solid #333; border-radius: 12px; padding: 20px 24px; margin: 20px 0; }
+  .method-title { font-size: 1.1rem; color: #fff; margin-bottom: 12px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 8px; }
+  .badge-easy { background: #1a3a1a; color: #4caf50; }
+  .badge-advanced { background: #3a2a1a; color: #ff9800; }
+  .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+  .tool-item { background: #1a1a2e; padding: 10px 14px; border-radius: 8px; border: 1px solid #2a2a3e; }
+  .tool-name { color: #6eb5ff; font-family: monospace; font-size: 0.9rem; }
+  .tool-desc { color: #888; font-size: 0.8rem; margin-top: 2px; }
+  .note { background: #2a2a1a; border: 1px solid #554400; border-radius: 8px; padding: 12px 16px; margin: 12px 0; color: #ddcc88; font-size: 0.9rem; }
+  .warn { background: #2a1a1a; border: 1px solid #550000; color: #dd8888; }
+  .copy-btn { background: #333; border: 1px solid #555; color: #ccc; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; float: right; }
+  .copy-btn:hover { background: #444; }
+  .screenshot { background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; color: #666; font-size: 0.85rem; }
+  @media (max-width: 600px) {
+    .tool-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 1.4rem; }
+    pre { font-size: 0.8rem; padding: 12px; }
+  }
+  .back-link { display: inline-block; margin-bottom: 16px; color: #6eb5ff; font-size: 0.9rem; }
+  .section-divider { border: none; border-top: 1px solid #222; margin: 40px 0; }
+  .faq dt { color: #fff; font-weight: 600; margin-top: 16px; }
+  .faq dd { color: #999; margin: 4px 0 12px 16px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<a href="/" class="back-link">&larr; 回到投資儀表板</a>
+
+<h1>投資寶庫 <span>Claude 設定指南</span></h1>
+<p class="subtitle">讓 Claude App（桌面版/手機版）和 Claude Code 直接查詢你的持股、分析策略、記錄交易</p>
+
+<h2>概覽</h2>
+<p>投資寶庫是一套基於 Google Sheets 的投資組合管理系統。你的持倉資料存在 Google Sheets，透過 API 或 MCP Server 讓 Claude 即時讀取。</p>
+
+<div class="note">
+  前提：你需要一個 Google Sheets 存放持倉資料，以及本系統的 API Key。<br>
+  如果你還沒有，請聯繫管理員取得。
+</div>
+
+<hr class="section-divider">
+
+<h2>方法一：Claude App（手機/桌面）<span class="badge badge-easy">推薦</span></h2>
+<p>透過 Remote MCP Server 連接，無需安裝任何東西。</p>
+
+<div class="step">
+  <p><span class="step-num">1</span><strong>打開 Claude App 設定</strong></p>
+  <p>桌面版：Settings &rarr; Integrations &rarr; Add Integration<br>
+     手機版：左下角 Profile &rarr; Integrations &rarr; Add</p>
+</div>
+
+<div class="step">
+  <p><span class="step-num">2</span><strong>新增 MCP Integration</strong></p>
+  <p>選擇 <strong>"Add custom MCP integration"</strong>，填入以下資訊：</p>
+  <pre><code>Name:   投資寶庫
+URL:    https://stock.cwithb.com/mcp</code></pre>
+</div>
+
+<div class="step">
+  <p><span class="step-num">3</span><strong>授權連接</strong></p>
+  <p>系統會自動導向 OAuth 授權頁面，點擊允許即可完成連接。</p>
+</div>
+
+<div class="step">
+  <p><span class="step-num">4</span><strong>開始使用</strong></p>
+  <p>回到 Claude 對話，直接問：</p>
+  <pre><code>"查詢我的美股持倉"
+"NVDA 現在多少錢？"
+"建議 Covered Call 策略"
+"分析台積電基本面"</code></pre>
+</div>
+
+<hr class="section-divider">
+
+<h2>方法二：Claude Code（終端機）<span class="badge badge-advanced">進階</span></h2>
+<p>適合開發者，透過本地 MCP Server 連接，功能更完整。</p>
+
+<h3>一鍵安裝</h3>
+<pre><code>curl -sL https://stock.cwithb.com/setup.sh | bash</code></pre>
+
+<h3>手動安裝</h3>
+
+<div class="step">
+  <p><span class="step-num">1</span><strong>下載 MCP Server</strong></p>
+  <pre><code>git clone https://github.com/chihao919/stock-api.git
+cd stock-api/mcp-server
+npm install</code></pre>
+</div>
+
+<div class="step">
+  <p><span class="step-num">2</span><strong>設定 Google Service Account</strong></p>
+  <p>到 <a href="https://console.cloud.google.com/iam-admin/serviceaccounts" target="_blank">Google Cloud Console</a> 建立 Service Account，下載 JSON 金鑰，放到：</p>
+  <pre><code>~/.config/claude-sheets/credentials.json</code></pre>
+  <p>然後在 Google Sheets 中將 Service Account Email 加為<strong>編輯者</strong>。</p>
+</div>
+
+<div class="step">
+  <p><span class="step-num">3</span><strong>註冊 MCP Server</strong></p>
+  <pre><code>claude mcp add portfolio \
+  -e PORTFOLIO_SHEET_ID="你的Spreadsheet_ID" \
+  -e GOOGLE_SA_KEY="~/.config/claude-sheets/credentials.json" \
+  -- node ~/stock-api/mcp-server/index.js</code></pre>
+</div>
+
+<div class="step">
+  <p><span class="step-num">4</span><strong>啟動 Claude Code</strong></p>
+  <pre><code>claude
+> 查詢我的美股持倉
+> 幫我分析 NVDA 基本面</code></pre>
+</div>
+
+<hr class="section-divider">
+
+<h2>方法三：Web 儀表板</h2>
+<p>直接在瀏覽器查看持倉，支援手機。</p>
+
+<div class="step">
+  <p><span class="step-num">1</span>打開 <a href="/">stock.cwithb.com</a></p>
+  <p><span class="step-num">2</span>用 Google 帳號登入</p>
+  <p><span class="step-num">3</span>即時查看所有持倉、損益、淨資產</p>
+  <p><span class="step-num">4</span>內建 AI 對話功能，可直接在頁面中分析</p>
+</div>
+
+<hr class="section-divider">
+
+<h2>可用工具一覽</h2>
+<div class="tool-grid">
+  <div class="tool-item">
+    <div class="tool-name">get_us_stocks</div>
+    <div class="tool-desc">美股持倉及損益（按帳戶分組）</div>
+  </div>
+  <div class="tool-item">
+    <div class="tool-name">get_tw_stocks</div>
+    <div class="tool-desc">台股持倉及損益（TWD/USD 雙幣）</div>
+  </div>
+  <div class="tool-item">
+    <div class="tool-name">get_options</div>
+    <div class="tool-desc">選擇權倉位、DTE、建議動作</div>
+  </div>
+  <div class="tool-item">
+    <div class="tool-name">get_networth</div>
+    <div class="tool-desc">淨資產：股票+債券-貸款</div>
+  </div>
+  <div class="tool-item">
+    <div class="tool-name">get_quote</div>
+    <div class="tool-desc">即時報價（美股/台股）</div>
+  </div>
+  <div class="tool-item">
+    <div class="tool-name">get_fx_rate</div>
+    <div class="tool-desc">USD/TWD 匯率</div>
+  </div>
+  <div class="tool-item">
+    <div class="tool-name">get_trades</div>
+    <div class="tool-desc">交易歷史紀錄</div>
+  </div>
+  <div class="tool-item">
+    <div class="tool-name">add_trade</div>
+    <div class="tool-desc">新增交易紀錄</div>
+  </div>
+  <div class="tool-item">
+    <div class="tool-name">analyze_stock</div>
+    <div class="tool-desc">基本面分析（黃國華法）</div>
+  </div>
+  <div class="tool-item">
+    <div class="tool-name">get_five_lines</div>
+    <div class="tool-desc">樂活五線譜技術分析</div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<h2>Google Sheets 格式</h2>
+<p>你的 Spreadsheet 需要包含以下工作表：</p>
+
+<h3>US_Stocks</h3>
+<pre><code>account     | ticker | shares | avg_cost
+------------|--------|--------|--------
+Firstrade   | GOOG   | 100    | 241.65
+Cathay_US   | VOO    | 17.56  | 546.76</code></pre>
+
+<h3>TW_Stocks</h3>
+<pre><code>ticker | name   | account    | shares | avg_cost_twd
+-------|--------|------------|--------|------------
+2330   | 台積電  | Yongfeng_B | 5000   | 854.56
+0050   | 元大50  | Cathay_TW  | 4075   | 61.26</code></pre>
+
+<h3>Options</h3>
+<pre><code>account   | ticker | expiry     | strike | type | qty | cost
+----------|--------|------------|--------|------|-----|-----
+Firstrade | GOOG   | 2026-04-17 | 330    | call | -1  | 450</code></pre>
+
+<h3>Trades</h3>
+<pre><code>date       | ticker | action | asset_type | qty | price | total_amount | pl  | result | reason          | lesson | tags    | account
+-----------|--------|--------|------------|-----|-------|-------------|-----|--------|-----------------|--------|---------|--------
+2026-03-15 | AAPL   | Sell   | Stock      | 10  | 180   | 1800        | 200 | Win    | Target reached  |        | swing   | Firstrade</code></pre>
+
+<hr class="section-divider">
+
+<h2>常見問題</h2>
+<dl class="faq">
+  <dt>Q: Claude App 連不上 MCP Server？</dt>
+  <dd>確認 URL 是 <code>https://stock.cwithb.com/mcp</code>（注意 https 和結尾的 /mcp）。如果之前連過，試著移除後重新加入。</dd>
+
+  <dt>Q: 手機版 Claude 也支援嗎？</dt>
+  <dd>支援！Claude iOS/Android App 都可以新增 MCP Integration，步驟跟桌面版一樣。</dd>
+
+  <dt>Q: 資料安全嗎？</dt>
+  <dd>所有資料存在你自己的 Google Sheets，API 透過 Service Account 讀取（唯讀或讀寫取決於權限設定）。API 端點需要 API Key 驗證。</dd>
+
+  <dt>Q: 可以多人使用嗎？</dt>
+  <dd>可以。每個用戶有自己的 Google Sheets，在 <a href="/settings">設定頁面</a> 填入自己的 Spreadsheet ID 即可。</dd>
+
+  <dt>Q: 如何更新持倉資料？</dt>
+  <dd>直接修改 Google Sheets，或透過 Web 儀表板的 AI 對話功能上傳券商截圖自動解析。</dd>
+</dl>
+
+<hr class="section-divider">
+<p style="text-align: center; color: #555; font-size: 0.85rem; margin-top: 32px;">
+  投資寶庫 &copy; 2026 &mdash; <a href="https://github.com/chihao919/stock-api">GitHub</a>
+</p>
+
+</div>
+</body>
+</html>
