@@ -3,47 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>投資寶庫 — Claude 設定指南</title>
+<title>穩健暴富收租室 — Claude 設定指南</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
-  .container { max-width: 800px; margin: 0 auto; padding: 24px 20px 60px; }
-  h1 { font-size: 1.8rem; margin-bottom: 8px; color: #fff; }
-  h1 span { font-size: 0.9rem; color: #888; font-weight: normal; }
-  .subtitle { color: #888; margin-bottom: 32px; font-size: 0.95rem; }
-  h2 { font-size: 1.3rem; color: #fff; margin: 36px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #333; }
-  h3 { font-size: 1.05rem; color: #ccc; margin: 20px 0 10px; }
-  p { margin: 10px 0; color: #bbb; }
-  a { color: #6eb5ff; text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  code { background: #1a1a2e; color: #a8d8a8; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: "SF Mono", Monaco, monospace; }
-  pre { background: #1a1a2e; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 12px 0; font-size: 0.85rem; line-height: 1.6; border: 1px solid #2a2a3e; }
-  pre code { background: none; padding: 0; }
-  .step { background: #141420; border: 1px solid #2a2a3e; border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
-  .step-num { display: inline-block; background: #6eb5ff; color: #000; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; font-size: 0.85rem; margin-right: 10px; }
-  .method { background: #1a1a2e; border: 1px solid #333; border-radius: 12px; padding: 20px 24px; margin: 20px 0; }
-  .method-title { font-size: 1.1rem; color: #fff; margin-bottom: 12px; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 8px; }
-  .badge-easy { background: #1a3a1a; color: #4caf50; }
-  .badge-advanced { background: #3a2a1a; color: #ff9800; }
-  .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
-  .tool-item { background: #1a1a2e; padding: 10px 14px; border-radius: 8px; border: 1px solid #2a2a3e; }
-  .tool-name { color: #6eb5ff; font-family: monospace; font-size: 0.9rem; }
-  .tool-desc { color: #888; font-size: 0.8rem; margin-top: 2px; }
-  .note { background: #2a2a1a; border: 1px solid #554400; border-radius: 8px; padding: 12px 16px; margin: 12px 0; color: #ddcc88; font-size: 0.9rem; }
-  .warn { background: #2a1a1a; border: 1px solid #550000; color: #dd8888; }
-  .copy-btn { background: #333; border: 1px solid #555; color: #ccc; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; float: right; }
-  .copy-btn:hover { background: #444; }
-  .screenshot { background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; color: #666; font-size: 0.85rem; }
-  @media (max-width: 600px) {
-    .tool-grid { grid-template-columns: 1fr; }
-    h1 { font-size: 1.4rem; }
-    pre { font-size: 0.8rem; padding: 12px; }
-  }
-  .back-link { display: inline-block; margin-bottom: 16px; color: #6eb5ff; font-size: 0.9rem; }
-  .section-divider { border: none; border-top: 1px solid #222; margin: 40px 0; }
-  .faq dt { color: #fff; font-weight: 600; margin-top: 16px; }
-  .faq dd { color: #999; margin: 4px 0 12px 16px; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1e293b; padding: 16px; font-size: 16px; line-height: 1.7; }
+.container { max-width: 800px; margin: 0 auto; }
+.back-link { display: inline-block; margin-bottom: 12px; color: #6366f1; font-size: 14px; text-decoration: none; font-weight: 600; }
+.back-link:hover { text-decoration: underline; }
+.page-header { text-align: center; padding: 20px 0 8px; }
+.page-header h1 { font-size: 22px; color: #6366f1; }
+.page-header .subtitle { font-size: 14px; color: #475569; margin-top: 6px; }
+h2 { font-size: 18px; color: #1e293b; margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+h3 { font-size: 15px; color: #475569; margin: 16px 0 8px; font-weight: 600; }
+p { margin: 8px 0; color: #475569; font-size: 15px; }
+a { color: #6366f1; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #eef2ff; color: #6366f1; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; font-family: 'SF Mono', Monaco, monospace; }
+pre { background: #fff; padding: 14px 16px; border-radius: 12px; overflow-x: auto; margin: 10px 0; font-size: 13px; line-height: 1.6; border: 1px solid #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+pre code { background: none; padding: 0; color: #1e293b; }
+
+/* Cards */
+.card { background: #fff; border-radius: 16px; padding: 18px 20px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.card-title { font-size: 16px; color: #1e293b; font-weight: 600; margin-bottom: 10px; }
+
+/* Steps */
+.step { background: #fff; border-radius: 12px; padding: 16px 18px; margin: 10px 0; box-shadow: 0 1px 6px rgba(0,0,0,0.05); border-left: 4px solid #6366f1; }
+.step-num { display: inline-flex; align-items: center; justify-content: center; background: #6366f1; color: #fff; width: 26px; height: 26px; border-radius: 50%; font-weight: 700; font-size: 13px; margin-right: 10px; flex-shrink: 0; }
+.step-header { display: flex; align-items: center; margin-bottom: 6px; }
+.step-header strong { font-size: 15px; color: #1e293b; }
+.step p { margin: 4px 0 4px 36px; font-size: 14px; color: #475569; }
+.step pre { margin-left: 36px; }
+
+/* Badges */
+.badge { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; margin-left: 8px; vertical-align: middle; }
+.badge-easy { background: #f0fdf4; color: #16a34a; }
+.badge-advanced { background: #fffbeb; color: #d97706; }
+
+/* Tool Grid */
+.tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+.tool-item { background: #fff; padding: 12px 14px; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
+.tool-name { color: #6366f1; font-family: 'SF Mono', Monaco, monospace; font-size: 14px; font-weight: 600; }
+.tool-desc { color: #94a3b8; font-size: 13px; margin-top: 2px; }
+
+/* Note */
+.note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 12px 16px; margin: 12px 0; color: #92400e; font-size: 14px; }
+
+/* Divider */
+.section-divider { border: none; border-top: 1px solid #e2e8f0; margin: 32px 0; }
+
+/* FAQ */
+.faq dt { color: #1e293b; font-weight: 600; margin-top: 14px; font-size: 15px; }
+.faq dd { color: #475569; margin: 4px 0 10px 16px; font-size: 14px; }
+
+/* Table preview */
+.sheet-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; white-space: nowrap; }
+.sheet-table th { text-align: left; font-weight: 600; color: #94a3b8; font-size: 12px; padding: 6px 10px; border-bottom: 2px solid #e2e8f0; background: #f8fafc; }
+.sheet-table td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; color: #475569; font-size: 13px; }
+.sheet-table tr:last-child td { border-bottom: none; }
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; background: #fff; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); margin: 8px 0; }
+
+.footer { text-align: center; color: #94a3b8; font-size: 13px; margin-top: 32px; padding: 16px 0; }
+
+@media (max-width: 600px) {
+  .tool-grid { grid-template-columns: 1fr; }
+  body { padding: 12px; }
+  .step pre { margin-left: 0; }
+  .step p { margin-left: 0; }
+}
 </style>
 </head>
 <body>
@@ -51,15 +77,18 @@
 
 <a href="/" class="back-link">&larr; 回到投資儀表板</a>
 
-<h1>投資寶庫 <span>Claude 設定指南</span></h1>
-<p class="subtitle">讓 Claude App（桌面版/手機版）和 Claude Code 直接查詢你的持股、分析策略、記錄交易</p>
+<div class="page-header">
+  <h1>穩健暴富收租室</h1>
+  <p class="subtitle">讓 Claude App（手機/桌面）和 Claude Code 直接查詢你的持股、分析策略、記錄交易</p>
+</div>
 
-<h2>概覽</h2>
-<p>投資寶庫是一套基於 Google Sheets 的投資組合管理系統。你的持倉資料存在 Google Sheets，透過 API 或 MCP Server 讓 Claude 即時讀取。</p>
+<div class="card">
+  <div class="card-title">概覽</div>
+  <p>投資寶庫是一套基於 Google Sheets 的投資組合管理系統。你的持倉資料存在 Google Sheets，透過 API 或 MCP Server 讓 Claude 即時讀取。</p>
+</div>
 
 <div class="note">
-  前提：你需要一個 Google Sheets 存放持倉資料，以及本系統的 API Key。<br>
-  如果你還沒有，請聯繫管理員取得。
+  前提：你需要一個 Google Sheets 存放持倉資料，以及本系統的 API Key。如果你還沒有，請聯繫管理員取得。
 </div>
 
 <hr class="section-divider">
@@ -68,25 +97,25 @@
 <p>透過 Remote MCP Server 連接，無需安裝任何東西。</p>
 
 <div class="step">
-  <p><span class="step-num">1</span><strong>打開 Claude App 設定</strong></p>
+  <div class="step-header"><span class="step-num">1</span><strong>打開 Claude App 設定</strong></div>
   <p>桌面版：Settings &rarr; Integrations &rarr; Add Integration<br>
      手機版：左下角 Profile &rarr; Integrations &rarr; Add</p>
 </div>
 
 <div class="step">
-  <p><span class="step-num">2</span><strong>新增 MCP Integration</strong></p>
-  <p>選擇 <strong>"Add custom MCP integration"</strong>，填入以下資訊：</p>
+  <div class="step-header"><span class="step-num">2</span><strong>新增 MCP Integration</strong></div>
+  <p>選擇 <strong>"Add custom MCP integration"</strong>，填入：</p>
   <pre><code>Name:   投資寶庫
 URL:    https://stock.cwithb.com/mcp</code></pre>
 </div>
 
 <div class="step">
-  <p><span class="step-num">3</span><strong>授權連接</strong></p>
+  <div class="step-header"><span class="step-num">3</span><strong>授權連接</strong></div>
   <p>系統會自動導向 OAuth 授權頁面，點擊允許即可完成連接。</p>
 </div>
 
 <div class="step">
-  <p><span class="step-num">4</span><strong>開始使用</strong></p>
+  <div class="step-header"><span class="step-num">4</span><strong>開始使用</strong></div>
   <p>回到 Claude 對話，直接問：</p>
   <pre><code>"查詢我的美股持倉"
 "NVDA 現在多少錢？"
@@ -105,21 +134,21 @@ URL:    https://stock.cwithb.com/mcp</code></pre>
 <h3>手動安裝</h3>
 
 <div class="step">
-  <p><span class="step-num">1</span><strong>下載 MCP Server</strong></p>
+  <div class="step-header"><span class="step-num">1</span><strong>下載 MCP Server</strong></div>
   <pre><code>git clone https://github.com/chihao919/stock-api.git
 cd stock-api/mcp-server
 npm install</code></pre>
 </div>
 
 <div class="step">
-  <p><span class="step-num">2</span><strong>設定 Google Service Account</strong></p>
+  <div class="step-header"><span class="step-num">2</span><strong>設定 Google Service Account</strong></div>
   <p>到 <a href="https://console.cloud.google.com/iam-admin/serviceaccounts" target="_blank">Google Cloud Console</a> 建立 Service Account，下載 JSON 金鑰，放到：</p>
   <pre><code>~/.config/claude-sheets/credentials.json</code></pre>
   <p>然後在 Google Sheets 中將 Service Account Email 加為<strong>編輯者</strong>。</p>
 </div>
 
 <div class="step">
-  <p><span class="step-num">3</span><strong>註冊 MCP Server</strong></p>
+  <div class="step-header"><span class="step-num">3</span><strong>註冊 MCP Server</strong></div>
   <pre><code>claude mcp add portfolio \
   -e PORTFOLIO_SHEET_ID="你的Spreadsheet_ID" \
   -e GOOGLE_SA_KEY="~/.config/claude-sheets/credentials.json" \
@@ -127,7 +156,7 @@ npm install</code></pre>
 </div>
 
 <div class="step">
-  <p><span class="step-num">4</span><strong>啟動 Claude Code</strong></p>
+  <div class="step-header"><span class="step-num">4</span><strong>啟動 Claude Code</strong></div>
   <pre><code>claude
 > 查詢我的美股持倉
 > 幫我分析 NVDA 基本面</code></pre>
@@ -139,10 +168,14 @@ npm install</code></pre>
 <p>直接在瀏覽器查看持倉，支援手機。</p>
 
 <div class="step">
-  <p><span class="step-num">1</span>打開 <a href="/">stock.cwithb.com</a></p>
-  <p><span class="step-num">2</span>用 Google 帳號登入</p>
-  <p><span class="step-num">3</span>即時查看所有持倉、損益、淨資產</p>
-  <p><span class="step-num">4</span>內建 AI 對話功能，可直接在頁面中分析</p>
+  <div class="step-header"><span class="step-num">1</span><strong>打開 <a href="/">stock.cwithb.com</a></strong></div>
+</div>
+<div class="step">
+  <div class="step-header"><span class="step-num">2</span><strong>用 Google 帳號登入</strong></div>
+</div>
+<div class="step">
+  <div class="step-header"><span class="step-num">3</span><strong>即時查看所有持倉、損益、淨資產</strong></div>
+  <p>內建 AI 對話功能，可直接在頁面中分析策略。</p>
 </div>
 
 <hr class="section-divider">
@@ -197,26 +230,38 @@ npm install</code></pre>
 <p>你的 Spreadsheet 需要包含以下工作表：</p>
 
 <h3>US_Stocks</h3>
-<pre><code>account     | ticker | shares | avg_cost
-------------|--------|--------|--------
-Firstrade   | GOOG   | 100    | 241.65
-Cathay_US   | VOO    | 17.56  | 546.76</code></pre>
+<div class="tbl-wrap">
+<table class="sheet-table">
+  <tr><th>account</th><th>ticker</th><th>shares</th><th>avg_cost</th></tr>
+  <tr><td>Firstrade</td><td>GOOG</td><td>100</td><td>241.65</td></tr>
+  <tr><td>Cathay_US</td><td>VOO</td><td>17.56</td><td>546.76</td></tr>
+</table>
+</div>
 
 <h3>TW_Stocks</h3>
-<pre><code>ticker | name   | account    | shares | avg_cost_twd
--------|--------|------------|--------|------------
-2330   | 台積電  | Yongfeng_B | 5000   | 854.56
-0050   | 元大50  | Cathay_TW  | 4075   | 61.26</code></pre>
+<div class="tbl-wrap">
+<table class="sheet-table">
+  <tr><th>ticker</th><th>name</th><th>account</th><th>shares</th><th>avg_cost_twd</th></tr>
+  <tr><td>2330</td><td>台積電</td><td>Yongfeng_B</td><td>5000</td><td>854.56</td></tr>
+  <tr><td>0050</td><td>元大50</td><td>Cathay_TW</td><td>4075</td><td>61.26</td></tr>
+</table>
+</div>
 
 <h3>Options</h3>
-<pre><code>account   | ticker | expiry     | strike | type | qty | cost
-----------|--------|------------|--------|------|-----|-----
-Firstrade | GOOG   | 2026-04-17 | 330    | call | -1  | 450</code></pre>
+<div class="tbl-wrap">
+<table class="sheet-table">
+  <tr><th>account</th><th>ticker</th><th>expiry</th><th>strike</th><th>type</th><th>qty</th><th>cost</th></tr>
+  <tr><td>Firstrade</td><td>GOOG</td><td>2026-04-17</td><td>330</td><td>call</td><td>-1</td><td>450</td></tr>
+</table>
+</div>
 
 <h3>Trades</h3>
-<pre><code>date       | ticker | action | asset_type | qty | price | total_amount | pl  | result | reason          | lesson | tags    | account
------------|--------|--------|------------|-----|-------|-------------|-----|--------|-----------------|--------|---------|--------
-2026-03-15 | AAPL   | Sell   | Stock      | 10  | 180   | 1800        | 200 | Win    | Target reached  |        | swing   | Firstrade</code></pre>
+<div class="tbl-wrap">
+<table class="sheet-table">
+  <tr><th>date</th><th>ticker</th><th>action</th><th>asset_type</th><th>qty</th><th>price</th><th>total_amount</th><th>pl</th><th>result</th><th>reason</th><th>account</th></tr>
+  <tr><td>2026-03-15</td><td>AAPL</td><td>Sell</td><td>Stock</td><td>10</td><td>180</td><td>1800</td><td>200</td><td>Win</td><td>Target reached</td><td>Firstrade</td></tr>
+</table>
+</div>
 
 <hr class="section-divider">
 
@@ -229,7 +274,7 @@ Firstrade | GOOG   | 2026-04-17 | 330    | call | -1  | 450</code></pre>
   <dd>支援！Claude iOS/Android App 都可以新增 MCP Integration，步驟跟桌面版一樣。</dd>
 
   <dt>Q: 資料安全嗎？</dt>
-  <dd>所有資料存在你自己的 Google Sheets，API 透過 Service Account 讀取（唯讀或讀寫取決於權限設定）。API 端點需要 API Key 驗證。</dd>
+  <dd>所有資料存在你自己的 Google Sheets，API 透過 Service Account 讀取。API 端點需要 API Key 驗證。</dd>
 
   <dt>Q: 可以多人使用嗎？</dt>
   <dd>可以。每個用戶有自己的 Google Sheets，在 <a href="/settings">設定頁面</a> 填入自己的 Spreadsheet ID 即可。</dd>
@@ -238,10 +283,9 @@ Firstrade | GOOG   | 2026-04-17 | 330    | call | -1  | 450</code></pre>
   <dd>直接修改 Google Sheets，或透過 Web 儀表板的 AI 對話功能上傳券商截圖自動解析。</dd>
 </dl>
 
-<hr class="section-divider">
-<p style="text-align: center; color: #555; font-size: 0.85rem; margin-top: 32px;">
-  投資寶庫 &copy; 2026 &mdash; <a href="https://github.com/chihao919/stock-api">GitHub</a>
-</p>
+<div class="footer">
+  穩健暴富收租室 &copy; 2026 &mdash; <a href="https://github.com/chihao919/stock-api">GitHub</a>
+</div>
 
 </div>
 </body>
