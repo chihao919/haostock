@@ -20,6 +20,7 @@
     { "source": "/portfolio", "destination": "/api" },
     { "source": "/settings", "destination": "/api" },
     { "source": "/guide", "destination": "/api" },
+    { "source": "/journal", "destination": "/api" },
     { "source": "/privacy", "destination": "/api" },
     { "source": "/terms", "destination": "/api" },
     { "source": "/static/:path*", "destination": "/api" },

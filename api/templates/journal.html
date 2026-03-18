@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>穩健暴富收租室 — 交易日誌</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1e293b; padding: 16px; font-size: 16px; }
+.container { max-width: 900px; margin: 0 auto; }
+.back-link { display: inline-block; margin-bottom: 12px; color: #6366f1; font-size: 14px; text-decoration: none; font-weight: 600; }
+.page-header { text-align: center; padding: 16px 0; }
+.page-header h1 { font-size: 22px; color: #6366f1; }
+.page-header .sub { font-size: 14px; color: #475569; margin-top: 4px; }
+
+/* Add form */
+.add-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 14px; background: #fff; border: 2px dashed #e2e8f0; border-radius: 12px; color: #6366f1; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 16px; }
+.add-btn:hover { border-color: #6366f1; background: #f8f7ff; }
+.form-card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); display: none; }
+.form-card.active { display: block; }
+.form-card h3 { font-size: 16px; color: #1e293b; margin-bottom: 14px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.form-row.full { grid-template-columns: 1fr; }
+.form-group label { display: block; font-size: 12px; color: #475569; margin-bottom: 4px; font-weight: 600; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 15px; font-family: inherit; background: #fff; color: #1e293b; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+.form-group textarea { resize: vertical; min-height: 60px; }
+.form-actions { display: flex; gap: 10px; margin-top: 14px; }
+.btn { padding: 10px 20px; border-radius: 10px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; }
+.btn-primary { background: #6366f1; color: #fff; flex: 1; }
+.btn-primary:hover { background: #5558e6; }
+.btn-secondary { background: #f1f5f9; color: #475569; }
+.btn-secondary:hover { background: #e2e8f0; }
+
+/* Journal entries */
+.entry { background: #fff; border-radius: 16px; padding: 16px 18px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.entry-ticker { font-weight: 700; font-size: 18px; color: #1e293b; }
+.entry-action { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+.action-buy { background: #f0fdf4; color: #16a34a; }
+.action-sell { background: #fef2f2; color: #dc2626; }
+.action-open { background: #eef2ff; color: #6366f1; }
+.action-close { background: #fffbeb; color: #d97706; }
+.action-roll { background: #f0f9ff; color: #0284c7; }
+.entry-meta { display: flex; gap: 16px; font-size: 13px; color: #94a3b8; margin-bottom: 8px; flex-wrap: wrap; }
+.entry-meta span { display: flex; align-items: center; gap: 4px; }
+.entry-reason { font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 6px; }
+.entry-lesson { font-size: 14px; color: #1e293b; background: #f8fafc; border-left: 3px solid #6366f1; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 8px; line-height: 1.6; }
+.entry-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.tag { background: #eef2ff; color: #6366f1; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+.entry-date { font-size: 13px; color: #94a3b8; }
+.empty { text-align: center; padding: 40px; color: #94a3b8; }
+.loading { text-align: center; padding: 40px; color: #94a3b8; }
+.pl-pos { color: #16a34a; }
+.pl-neg { color: #dc2626; }
+
+@media (max-width: 600px) {
+  .form-row { grid-template-columns: 1fr; }
+  body { padding: 10px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<a href="/" class="back-link">&larr; 回到儀表板</a>
+
+<div class="page-header">
+  <h1>交易日誌</h1>
+  <p class="sub">記錄每筆交易的原因和心得</p>
+</div>
+
+<div class="add-btn" onclick="toggleForm()">+ 新增交易紀錄</div>
+
+<div class="form-card" id="add-form">
+  <h3>新增交易</h3>
+  <div class="form-row">
+    <div class="form-group">
+      <label>日期</label>
+      <input type="date" id="f-date">
+    </div>
+    <div class="form-group">
+      <label>標的</label>
+      <input type="text" id="f-ticker" placeholder="CCJ, HIMS...">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>動作</label>
+      <select id="f-action">
+        <option value="Buy">Buy 買入</option>
+        <option value="Sell">Sell 賣出</option>
+        <option value="Open">Open 開倉</option>
+        <option value="Close">Close 平倉</option>
+        <option value="Roll">Roll 展期</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>帳戶</label>
+      <select id="f-account">
+        <option value="Firstrade_US">Firstrade_US</option>
+        <option value="Firstrade_TW">Firstrade_TW</option>
+        <option value="Cathay_US">Cathay_US</option>
+        <option value="IBKR_TW">IBKR_TW</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>數量</label>
+      <input type="number" id="f-qty" placeholder="100">
+    </div>
+    <div class="form-group">
+      <label>價格</label>
+      <input type="number" id="f-price" step="0.01" placeholder="113.40">
+    </div>
+  </div>
+  <div class="form-row full">
+    <div class="form-group">
+      <label>交易原因</label>
+      <textarea id="f-reason" placeholder="為什麼做這筆交易？"></textarea>
+    </div>
+  </div>
+  <div class="form-row full">
+    <div class="form-group">
+      <label>心得 / 教訓</label>
+      <textarea id="f-lesson" placeholder="這筆交易學到什麼？"></textarea>
+    </div>
+  </div>
+  <div class="form-row full">
+    <div class="form-group">
+      <label>標籤</label>
+      <input type="text" id="f-tags" placeholder="covered-call, 加碼, 停損...（逗號分隔）">
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-secondary" onclick="toggleForm()">取消</button>
+    <button class="btn btn-primary" onclick="submitEntry()">儲存</button>
+  </div>
+</div>
+
+<div id="entries-list">
+  <div class="loading">載入中...</div>
+</div>
+
+</div>
+
+<script>
+const API_KEY = localStorage.getItem('api_key') || '';
+const headers = API_KEY ? {'x-api-key': API_KEY, 'Content-Type': 'application/json'} : {'Content-Type': 'application/json'};
+
+function toggleForm() {
+  const form = document.getElementById('add-form');
+  form.classList.toggle('active');
+  if (form.classList.contains('active') && !document.getElementById('f-date').value) {
+    document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  }
+}
+
+function actionClass(action) {
+  const map = {Buy:'action-buy', Sell:'action-sell', Open:'action-open', Close:'action-close', Roll:'action-roll'};
+  return map[action] || 'action-buy';
+}
+
+function renderEntries(entries) {
+  const el = document.getElementById('entries-list');
+  if (!entries.length) {
+    el.innerHTML = '<div class="empty">還沒有交易紀錄，點上方 + 新增第一筆</div>';
+    return;
+  }
+  el.innerHTML = entries.map(e => {
+    const total = e.total ? `$${Number(e.total).toLocaleString()}` : '';
+    const tags = (e.tags || '').split(',').filter(t => t.trim()).map(t => `<span class="tag">${t.trim()}</span>`).join('');
+    return `
+    <div class="entry">
+      <div class="entry-header">
+        <div>
+          <span class="entry-ticker">${e.ticker || '—'}</span>
+          <span class="entry-action ${actionClass(e.action)}">${e.action || ''}</span>
+        </div>
+        <span class="entry-date">${e.date || ''}</span>
+      </div>
+      <div class="entry-meta">
+        ${e.qty ? `<span>${e.qty} 股/張</span>` : ''}
+        ${e.price ? `<span>@ $${e.price}</span>` : ''}
+        ${total ? `<span>${total}</span>` : ''}
+        ${e.account ? `<span>${e.account}</span>` : ''}
+      </div>
+      ${e.reason ? `<div class="entry-reason">${e.reason}</div>` : ''}
+      ${e.lesson ? `<div class="entry-lesson">${e.lesson}</div>` : ''}
+      ${tags ? `<div class="entry-tags">${tags}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function loadEntries() {
+  try {
+    const r = await fetch('/api/journal', {headers});
+    const data = await r.json();
+    renderEntries(data.entries || []);
+  } catch (e) {
+    document.getElementById('entries-list').innerHTML = '<div class="empty">載入失敗: ' + e.message + '</div>';
+  }
+}
+
+async function submitEntry() {
+  const body = {
+    date: document.getElementById('f-date').value,
+    ticker: document.getElementById('f-ticker').value.toUpperCase(),
+    action: document.getElementById('f-action').value,
+    qty: document.getElementById('f-qty').value,
+    price: document.getElementById('f-price').value,
+    total: document.getElementById('f-qty').value && document.getElementById('f-price').value
+      ? (parseFloat(document.getElementById('f-qty').value) * parseFloat(document.getElementById('f-price').value)).toFixed(2)
+      : '',
+    account: document.getElementById('f-account').value,
+    reason: document.getElementById('f-reason').value,
+    lesson: document.getElementById('f-lesson').value,
+    tags: document.getElementById('f-tags').value,
+  };
+  if (!body.ticker) { alert('請輸入標的'); return; }
+  try {
+    await fetch('/api/journal', {method: 'POST', headers, body: JSON.stringify(body)});
+    toggleForm();
+    // Clear form
+    ['f-ticker','f-qty','f-price','f-reason','f-lesson','f-tags'].forEach(id => document.getElementById(id).value = '');
+    loadEntries();
+  } catch (e) {
+    alert('儲存失敗: ' + e.message);
+  }
+}
+
+loadEntries();
+</script>
+</body>
+</html>

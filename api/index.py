@@ -15,7 +15,7 @@ app = FastAPI(title="Portfolio Quotes API", version="2.0.0")
 _API_KEY = os.environ.get("FINANCIAL_API_KEY", "")
 
 # Paths that don't require API key
-_PUBLIC_PATHS = {"/api/health", "/api/auth", "/api/fivelines/auth", "/api/config", "/", "/fivelines", "/portfolio", "/privacy", "/terms", "/setup.sh", "/settings", "/guide"}
+_PUBLIC_PATHS = {"/api/health", "/api/auth", "/api/fivelines/auth", "/api/config", "/", "/fivelines", "/portfolio", "/privacy", "/terms", "/setup.sh", "/settings", "/guide", "/journal"}
 
 
 class APIKeyMiddleware(BaseHTTPMiddleware):
@@ -934,6 +934,44 @@ def settings_page():
 def guide_page():
     html_path = Path(__file__).parent / "templates" / "guide.html"
     return html_path.read_text(encoding="utf-8")
+
+
+@app.get("/journal", response_class=HTMLResponse)
+def journal_page():
+    html_path = Path(__file__).parent / "templates" / "journal.html"
+    return html_path.read_text(encoding="utf-8")
+
+
+@app.get("/api/journal")
+def list_journal(limit: int = 50):
+    try:
+        rows = read_sheet("Journal", _PORTFOLIO_SHEET_ID)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Sheets API error: {e}")
+    rows.sort(key=lambda x: x.get("date", ""), reverse=True)
+    return {"entries": rows[:limit], "total": len(rows), "timestamp": datetime.now().isoformat()}
+
+
+@app.post("/api/journal", status_code=201)
+async def add_journal(request: Request):
+    body = await request.json()
+    row = [
+        body.get("date", datetime.now().strftime("%Y-%m-%d")),
+        body.get("ticker", ""),
+        body.get("action", ""),
+        str(body.get("qty", "")),
+        str(body.get("price", "")),
+        str(body.get("total", "")),
+        body.get("account", ""),
+        body.get("reason", ""),
+        body.get("lesson", ""),
+        body.get("tags", ""),
+    ]
+    try:
+        append_rows("Journal", [row], _PORTFOLIO_SHEET_ID)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Sheets API error: {e}")
+    return {"status": "created", "timestamp": datetime.now().isoformat()}
 
 
 # --- Five Lines (樂活五線譜) ---
